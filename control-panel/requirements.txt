@@ -1,0 +1,5 @@
+Name              Installed Available    Location Description
+Adafruit NeoPixel 1.15.2    -            user     -
+Bounce2           2.71      -            user     -
+LiquidCrystal I2C 1.1.2     -            user     -
+
