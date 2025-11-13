@@ -14,18 +14,32 @@ uint8_t colPins[COLS] = { 3, 2 };
 uint8_t rowPins[ROWS] = { 7, 6, 5, 4 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
+// ******** LED SETUP ********
 #define LED_PIN       8
 #define NUM_LEDS      4
 Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
-uint32_t COLOR_NONE   = pixels.Color(0, 0, 0);
-uint32_t COLOR_HUMAN  = pixels.Color(0, 0, 255);   // Blue
-uint32_t COLOR_EASY   = pixels.Color(0, 255, 0);   // Green
-uint32_t COLOR_MEDIUM = pixels.Color(255, 128, 0); // Orange
-uint32_t COLOR_HARD   = pixels.Color(255, 0, 0);   // Red
+uint32_t playerTypeLEDs[5] = {pixels.Color(0, 0, 0), pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
 
 bool mute = 0;
-enum State { ALPHA, BETA, GAMMA };
-State state = ALPHA;
+enum State { CONF, WAIT };
+State state = CONF;
+
+enum playerType {
+  NO_PLAYER,
+  HUMAN,
+  EASY,
+  MEDIUM,
+  HARD
+};
+
+enum playerColor {
+  BLUE_PLAYER,
+  RED_PLAYER,
+  GREEN_PLAYER,
+  YELLOW_PLAYER
+};
+
+playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
 void setup() {
   pixels.begin();
@@ -33,11 +47,10 @@ void setup() {
 }
 
 void loop() {
-  readSerial();  // may update state
+  // readSerial();  // may update state
   switch (state) {
-    case ALPHA: alpha(); break;
-    case BETA:  beta();  break;
-    case GAMMA: gamma(); break;
+    case CONF: configuration(); break;
+    case WAIT: waiting(); break;
   }
 }
 
@@ -47,11 +60,11 @@ void readSerial() {
     input.trim(); // remove any \r or whitespace
 
     if (input == "alpha") {
-      state = ALPHA;
+      // state = ALPHA;
     } else if (input == "beta") {
-      state = BETA;
+      // state = BETA;
     } else if (input == "gamma") {
-      state = GAMMA;
+      // state = GAMMA;
     }
   }
 }

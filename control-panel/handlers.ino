@@ -1,14 +1,21 @@
+void handleBlue() {
+  players[BLUE_PLAYER] = (players[BLUE_PLAYER] + 1) % 5;
+  updatePixels();
+}
+
 void handleRed() {
-  Serial.println("Red LED toggled");
+  players[RED_PLAYER] = (players[RED_PLAYER] + 1) % 5;
+  updatePixels();
 }
 
 void handleGreen() {
-
-  Serial.println("Green LED toggled");
+  players[GREEN_PLAYER] = (players[GREEN_PLAYER] + 1) % 5;
+  updatePixels();
 }
 
-void handleBlue() {
-  Serial.println("Blue LED toggled");
+void handleYellow() {
+  players[YELLOW_PLAYER] = (players[YELLOW_PLAYER] + 1) % 5;
+  updatePixels();
 }
 
 int encodeKey(char key) {
@@ -25,35 +32,38 @@ int encodeKey(char key) {
   }
 }
 
-void pollKeys(bool buttonActive[8]) {
+void pollKeys(void (*handlers[8])(void)) {
   char key = keypad.getKey();
   if (key == NO_KEY) return;
-  if (!buttonActive[encodeKey(key)]) return;
+  int index = encodeKey(key);
+  if (handlers[index] == nullptr) return;
   if (!mute || key == 'M') tone(9, 300, 100);
-  switch (key) {
-    case 'B':
-      handleBlue();
-      break;
-    case 'R':
-      handleRed();
-      break;
-    case 'G':
-      handleGreen();
-      break;
-    case 'Y':
-      // placeholder: handleYellow();
-      break;
-    case 'S':
-      // placeholder: handleStart();
-      break;
-    case 'D':
-      // placeholder: handleDice();
-      break;
-    case 'M':
-      mute = (mute ? 0 : 1);
-      break;
-    case 'F':
-      // placeholder: handleFix();
-      break;
+  handlers[index]();
+}
+
+void handleMute() {
+  mute = (mute ? 0 : 1);
+}
+
+void handleConfStart() {
+  // count players
+  int numPlayers = 0;
+  for (playerType p : players) {
+    if (p != NO_PLAYER) numPlayers++;
   }
+  if (numPlayers > 1) {
+    pixels.clear();
+    pixels.show();
+    state = WAIT;
+  }
+  else {
+    Serial.println("not enough players");
+  }
+}
+
+void updatePixels() {
+  for (int i = 0; i < 4; i++) {
+    pixels.setPixelColor(3 - i, playerTypeLEDs[players[i]]);
+  }
+  pixels.show();
 }
