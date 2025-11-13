@@ -6,6 +6,14 @@ void configuration() {
 }
 
 void waiting() {
-  Serial.println("entering waiting");
-  while(1);
+  while (state == WAIT) {
+    readSerial();
+  }
+}
+
+void botTurn() {
+  Serial.println("bots be like");
+  updatePlayerLED(activePlayer);
+  pixels.show();
+  while(true);
 }

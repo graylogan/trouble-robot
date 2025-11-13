@@ -1,21 +1,21 @@
 void handleBlue() {
   players[BLUE_PLAYER] = (players[BLUE_PLAYER] + 1) % 5;
-  updatePixels();
+  updatePlayerLED(BLUE_PLAYER);
 }
 
 void handleRed() {
   players[RED_PLAYER] = (players[RED_PLAYER] + 1) % 5;
-  updatePixels();
+  updatePlayerLED(RED_PLAYER);
 }
 
 void handleGreen() {
   players[GREEN_PLAYER] = (players[GREEN_PLAYER] + 1) % 5;
-  updatePixels();
+  updatePlayerLED(GREEN_PLAYER);
 }
 
 void handleYellow() {
   players[YELLOW_PLAYER] = (players[YELLOW_PLAYER] + 1) % 5;
-  updatePixels();
+  updatePlayerLED(YELLOW_PLAYER);
 }
 
 int encodeKey(char key) {
@@ -54,6 +54,7 @@ void handleConfStart() {
   if (numPlayers > 1) {
     pixels.clear();
     pixels.show();
+    sendPlayers();
     state = WAIT;
   }
   else {
@@ -61,9 +62,29 @@ void handleConfStart() {
   }
 }
 
-void updatePixels() {
-  for (int i = 0; i < 4; i++) {
-    pixels.setPixelColor(3 - i, playerTypeLEDs[players[i]]);
+void sendPlayers() {
+  for (playerType p : players) {
+    Serial.print(p);
   }
+  Serial.println();
+}
+
+void updatePlayerLED(int player) {
+  pixels.setPixelColor(3 - player, playerTypeLEDs[players[player]]);
   pixels.show();
+}
+
+void waitSerial(String input) {
+  Serial.println("wait serial");
+  char c = input.charAt(0);
+  activePlayer = c - '0';
+  Serial.print(activePlayer);
+  Serial.print(players[activePlayer]);
+  Serial.println(players[activePlayer] == HUMAN);
+  if (players[activePlayer] == HUMAN) {
+    state = HUMAN_ROLL;
+  }
+  else {
+    state = BOT;
+  }
 }

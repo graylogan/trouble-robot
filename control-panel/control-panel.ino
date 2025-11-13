@@ -21,8 +21,9 @@ Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 uint32_t playerTypeLEDs[5] = {pixels.Color(0, 0, 0), pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
 
 bool mute = 0;
-enum State { CONF, WAIT };
+enum State { CONF, WAIT, BOT, HUMAN_ROLL };
 State state = CONF;
+int activePlayer;
 
 enum playerType {
   NO_PLAYER,
@@ -44,6 +45,7 @@ playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 void setup() {
   pixels.begin();
   Serial.begin(9600);
+  Serial.setTimeout(0)
 }
 
 void loop() {
@@ -51,6 +53,7 @@ void loop() {
   switch (state) {
     case CONF: configuration(); break;
     case WAIT: waiting(); break;
+    case BOT: botTurn(); break;
   }
 }
 
@@ -58,13 +61,8 @@ void readSerial() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     input.trim(); // remove any \r or whitespace
-
-    if (input == "alpha") {
-      // state = ALPHA;
-    } else if (input == "beta") {
-      // state = BETA;
-    } else if (input == "gamma") {
-      // state = GAMMA;
+    switch(state) {
+      case WAIT: waitSerial(input);
     }
   }
 }
