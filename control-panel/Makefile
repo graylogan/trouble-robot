@@ -9,6 +9,7 @@ BUILD_DIR := build
 all: compile
 
 compile: $(INO)
+	clang-format -i *.ino
 	@echo "Compiling $(INO) for $(BOARD)..."
 	@$(ARDUINO_CLI) compile -b $(BOARD) -e $(INO)
 

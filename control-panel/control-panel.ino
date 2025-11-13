@@ -1,68 +1,74 @@
-#include <Keypad.h>
 #include <Adafruit_NeoPixel.h>
+#include <Keypad.h>
 
-// ******** KEYPAD SETUP ********
+/* **************************
+         KEYPAD SETUP
+************************** */
+
 const uint8_t ROWS = 4;
 const uint8_t COLS = 2;
-char keys[ROWS][COLS] = {
-  { 'B', 'S' },
-  { 'R', 'D' },
-  { 'G', 'M' },
-  { 'Y', 'F' }
-};
-uint8_t colPins[COLS] = { 3, 2 };
-uint8_t rowPins[ROWS] = { 7, 6, 5, 4 };
+char keys[ROWS][COLS] = {{'B', 'S'}, {'R', 'D'}, {'G', 'M'}, {'Y', 'F'}};
+uint8_t colPins[COLS] = {3, 2};
+uint8_t rowPins[ROWS] = {7, 6, 5, 4};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-// ******** LED SETUP ********
-#define LED_PIN       8
-#define NUM_LEDS      4
+/* **************************
+         NEOPIXEL SETUP
+************************** */
+#define LED_PIN 8
+#define NUM_LEDS 4
 Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
-uint32_t playerTypeLEDs[5] = {pixels.Color(0, 0, 0), pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
+uint32_t playerTypeLEDs[5] = {
+    pixels.Color(0, 0, 0), pixels.Color(0, 0, 255), pixels.Color(0, 255, 0),
+    pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
 
+/* **************************
+         ENUMS
+************************** */
+
+// indeces parallel with playerTypeLEDs
+enum playerType { NO_PLAYER, HUMAN, EASY, MEDIUM, HARD };
+
+enum playerColor { BLUE_PLAYER, RED_PLAYER, GREEN_PLAYER, YELLOW_PLAYER };
+
+enum State { CONF, WAIT, BOT, HUMAN_ROLL, HUMAN_TURN };
+
+/* **************************
+      GLOBAL VARIABLES
+************************** */
 bool mute = 0;
-enum State { CONF, WAIT, BOT, HUMAN_ROLL };
 State state = CONF;
-int activePlayer;
-
-enum playerType {
-  NO_PLAYER,
-  HUMAN,
-  EASY,
-  MEDIUM,
-  HARD
-};
-
-enum playerColor {
-  BLUE_PLAYER,
-  RED_PLAYER,
-  GREEN_PLAYER,
-  YELLOW_PLAYER
-};
-
+int activePlayer;  // player whose turn it is
+bool botReset = 0; // used when transitioning from BOT -> BOT
+// holds type of each player; indeces parallel with playerColor
 playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
 void setup() {
   pixels.begin();
   Serial.begin(9600);
-  Serial.setTimeout(0)
 }
 
+// once a state is changed, its loop breaks and control returns here
 void loop() {
-  // readSerial();  // may update state
-  switch (state) {
-    case CONF: configuration(); break;
-    case WAIT: waiting(); break;
-    case BOT: botTurn(); break;
-  }
-}
+  // update turn LED (will be overridden for conf)
+  pixels.clear();
+  updatePlayerLED(activePlayer);
 
-void readSerial() {
-  if (Serial.available() > 0) {
-    String input = Serial.readStringUntil('\n');
-    input.trim(); // remove any \r or whitespace
-    switch(state) {
-      case WAIT: waitSerial(input);
-    }
+  switch (state) {
+  case CONF:
+    configuration();
+    break;
+  case WAIT:
+    waiting();
+    break;
+  case BOT:
+    botTurn();
+    break;
+  case HUMAN_ROLL:
+    humanRoll();
+    break;
+  case HUMAN_TURN:
+    humanTurn();
+    break;
   }
 }
