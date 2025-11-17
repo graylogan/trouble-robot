@@ -69,3 +69,31 @@ void updatePlayerLED(int player) {
   pixels.setPixelColor(3 - player, playerTypeLEDs[players[player]]);
   pixels.show();
 }
+
+void updateTurnLCD(int playerIndex) {
+  lcdBuffer[0] = prettyPlayerColor[playerIndex] + " Turn";
+  lcdBuffer[1] = "";
+  printToLcd();
+}
+
+void errorSound() {
+  tone(9, 100, 100); // 100 Hz for 100 ms
+  delay(100);
+  delay(75);         // pause 50 ms
+  tone(9, 100, 200); // 100 Hz for 200 ms
+  delay(200);
+}
+
+void playerLCD(int playerIndex) {
+  lcdBuffer[0] = prettyPlayerColor[playerIndex] + " Player";
+  lcdBuffer[1] = prettyPlayerType[players[playerIndex]];
+  printToLcd();
+}
+
+void printToLcd() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(lcdBuffer[0]);
+  lcd.setCursor(0, 1);
+  lcd.print(lcdBuffer[1]);
+}

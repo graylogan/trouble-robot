@@ -1,5 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <Keypad.h>
+#include <LiquidCrystal_I2C.h>
 
 /* **************************
          KEYPAD SETUP
@@ -23,13 +24,24 @@ uint32_t playerTypeLEDs[5] = {
     pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
 
 /* **************************
+         LCD SETUP
+************************** */
+#define LCD_ADDR 0x27 // Common I2C LCD address; change if needed
+#define LCD_COLS 16
+#define LCD_ROWS 2
+LiquidCrystal_I2C lcd(LCD_ADDR, LCD_COLS, LCD_ROWS);
+String lcdBuffer[2]; // store 2 lines
+
+/* **************************
          ENUMS
 ************************** */
 
 // indeces parallel with playerTypeLEDs
 enum playerType { NO_PLAYER, HUMAN, EASY, MEDIUM, HARD };
+String prettyPlayerType[] = {"None", "Human", "Easy", "Medium", "Hard"};
 
 enum playerColor { BLUE_PLAYER, RED_PLAYER, GREEN_PLAYER, YELLOW_PLAYER };
+String prettyPlayerColor[] = {"Blue", "Red", "Green", "Yellow"};
 
 enum State { CONF, WAIT, BOT, HUMAN_ROLL, HUMAN_TURN };
 
@@ -44,8 +56,11 @@ bool botReset = 0; // used when transitioning from BOT -> BOT
 playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
 void setup() {
-  pixels.begin();
   Serial.begin(9600);
+  pixels.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
 }
 
 // once a state is changed, its loop breaks and control returns here
@@ -53,6 +68,7 @@ void loop() {
   // update turn LED (will be overridden for conf)
   pixels.clear();
   updatePlayerLED(activePlayer);
+  updateTurnLCD(activePlayer);
 
   switch (state) {
   case CONF:

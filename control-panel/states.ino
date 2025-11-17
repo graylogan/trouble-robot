@@ -10,6 +10,11 @@ void configuration() {
   pixels.clear();
   pixels.show();
 
+  // LCD
+  lcdBuffer[0] = "Game Setup: Use";
+  lcdBuffer[1] = "Player Buttons";
+  printToLcd();
+
   void (*handlers[])(void) = {handleBlue,   handleRed,       handleGreen,
                               handleYellow, handleConfStart, nullptr,
                               handleMute,   nullptr};
