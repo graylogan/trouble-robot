@@ -45,8 +45,9 @@ void handleConfStart() {
     sendPlayers();
     changeState(WAIT);
   } else {
-    // LCD logic here
-    Serial.println("not enough players");
+    lcdBuffer[0] = "Need at Least";
+    lcdBuffer[1] = "2 Players";
+    printToLcd();
     errorSound();
   }
 }
