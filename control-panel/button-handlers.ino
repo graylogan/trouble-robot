@@ -43,7 +43,7 @@ void handleConfStart() {
     pixels.clear();
     pixels.show();
     sendPlayers();
-    state = WAIT;
+    changeState(WAIT);
   } else {
     // LCD logic here
     Serial.println("not enough players");
@@ -66,5 +66,5 @@ void handleMute() { mute = (mute ? 0 : 1); }
 void handleDice() {
   // dice roll logic here
   Serial.println("Human rolled dice!");
-  state = HUMAN_TURN;
+  changeState(HUMAN_TURN);
 }

@@ -46,12 +46,18 @@ String prettyPlayerColor[] = {"Blue", "Red", "Green", "Yellow"};
 enum State { CONF, WAIT, BOT, HUMAN_ROLL, HUMAN_TURN };
 
 /* **************************
+      ERROR SOUND
+************************** */
+bool errorSoundActive = false; // true while the error sound sequence is playing
+uint8_t errorSoundPhase = 0;   // phase of the sound sequence
+unsigned long errorSoundNextMillis; // when to move to the next phase
+
+/* **************************
       GLOBAL VARIABLES
 ************************** */
 bool mute = 0;
 State state = CONF;
-int activePlayer;  // player whose turn it is
-bool botReset = 0; // used when transitioning from BOT -> BOT
+int activePlayer; // player whose turn it is
 // holds type of each player; indeces parallel with playerColor
 playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
@@ -61,30 +67,30 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcd.clear();
+  configuration_setup();
 }
 
-// once a state is changed, its loop breaks and control returns here
 void loop() {
-  // update turn LED (will be overridden for conf)
-  pixels.clear();
-  updatePlayerLED(activePlayer);
-  updateTurnLCD(activePlayer);
-
+  // tick the current state once per loop iteration
   switch (state) {
   case CONF:
-    configuration();
+    configuration_tick();
     break;
   case WAIT:
-    waiting();
+    waiting_tick();
     break;
   case BOT:
-    botTurn();
+    bot_tick();
     break;
   case HUMAN_ROLL:
-    humanRoll();
+    humanRoll_tick();
     break;
   case HUMAN_TURN:
-    humanTurn();
+    humanTurn_tick();
     break;
+  }
+  // drive non-blocking error sound sequence if active
+  if (errorSoundActive) {
+    handleErrorSound();
   }
 }

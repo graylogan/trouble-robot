@@ -4,10 +4,10 @@ void waitSerial(String input) {
   char c = input.charAt(0);
   activePlayer = c - '0';
   if (players[activePlayer] == HUMAN) {
-    state =
-        HUMAN_ROLL; //!!! NEED TO DISTINGUISH BETWEEN FIRST AND SUBSEQUENT TURNS
+    changeState(HUMAN_ROLL); //!!! NEED TO DISTINGUISH BETWEEN FIRST AND
+                             //! SUBSEQUENT TURNS
   } else {
-    state = BOT;
+    changeState(BOT);
   }
 }
 
@@ -17,8 +17,8 @@ void botSerial(String input) {
   char c = input.charAt(0);
   activePlayer = c - '0';
   if (players[activePlayer] == HUMAN) {
-    state = HUMAN_ROLL;
+    changeState(HUMAN_ROLL);
   } else {
-    botReset = 1;
+    changeState(BOT);
   }
 }

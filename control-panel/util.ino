@@ -70,18 +70,52 @@ void updatePlayerLED(int player) {
   pixels.show();
 }
 
-void updateTurnLCD(int playerIndex) {
-  lcdBuffer[0] = prettyPlayerColor[playerIndex] + " Turn";
+void updateTurnLCD() {
+  lcdBuffer[0] = prettyPlayerColor[activePlayer] + " Turn";
   lcdBuffer[1] = "";
   printToLcd();
 }
 
+// Start the non-blocking error sound sequence. This returns immediately
+// and the sequence is driven by `handleErrorSound()` which should be
+// called from `loop()` while `errorSoundActive` is true.
 void errorSound() {
-  tone(9, 100, 100); // 100 Hz for 100 ms
-  delay(100);
-  delay(75);         // pause 50 ms
-  tone(9, 100, 200); // 100 Hz for 200 ms
-  delay(200);
+  if (!errorSoundActive) {
+    errorSoundActive = true;
+    errorSoundPhase = 0;
+    errorSoundNextMillis = 0;
+  }
+}
+
+// Drive the error sound sequence without blocking using millis().
+// Phases:
+// 0 - start first tone (100ms) and schedule second tone after 100+75 ms
+// 1 - start second tone (200ms) and schedule end after 200 ms
+// 2 - finish and deactivate
+void handleErrorSound() {
+  if (!errorSoundActive)
+    return;
+
+  unsigned long now = millis();
+  if (errorSoundPhase == 0) {
+    // start first tone for 100 ms
+    tone(9, 100, 100);
+    errorSoundNextMillis = now + 100UL + 75UL; // wait for tone + pause
+    errorSoundPhase = 1;
+  } else if (errorSoundPhase == 1) {
+    if ((long)(now - errorSoundNextMillis) >= 0) {
+      // start second tone for 200 ms
+      tone(9, 100, 200);
+      errorSoundNextMillis = now + 200UL;
+      errorSoundPhase = 2;
+    }
+  } else if (errorSoundPhase == 2) {
+    if ((long)(now - errorSoundNextMillis) >= 0) {
+      // sequence complete
+      errorSoundActive = false;
+      errorSoundPhase = 0;
+    }
+  }
 }
 
 void playerLCD(int playerIndex) {
@@ -96,4 +130,25 @@ void printToLcd() {
   lcd.print(lcdBuffer[0]);
   lcd.setCursor(0, 1);
   lcd.print(lcdBuffer[1]);
+}
+
+void changeState(int newState) {
+  switch (newState) {
+  case CONF:
+    configuration_setup();
+    break;
+  case WAIT:
+    waiting_setup();
+    break;
+  case BOT:
+    bot_setup();
+    break;
+  case HUMAN_ROLL:
+    humanRoll_setup();
+    break;
+  case HUMAN_TURN:
+    humanTurn_setup();
+    break;
+  }
+  state = newState;
 }
