@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Keypad.h>
 #include <LiquidCrystal_I2C.h>
+#include <NonBlockingRtttl.h>
 
 /* **************************
          KEYPAD SETUP
@@ -49,9 +50,14 @@ enum State { CONF, WAIT, BOT, HUMAN_ROLL, HUMAN_TURN };
 /* **************************
       SOUND VARS
 ************************** */
-bool errorSoundActive = false; // true while the error sound sequence is playing
-uint8_t errorSoundPhase = 0;   // phase of the sound sequence
-unsigned long errorSoundNextMillis; // when to move to the next phase
+const int BUZZER_PIN = 9;
+const char *ERROR_SOUND = "error:d=4,o=4,b=600:c,8P,16P,2c";
+const char *MUTE_SOUND = "mute:d=4,o=4,b=600:f,8P,c";
+const char *UNMUTE_SOUND = "unmute:d=4,o=4,b=600:c,8P,f";
+const char *BUTTON_SOUND = "unmute:d=4,o=4,b=600:a";
+const char *VICTORY_SOUND =
+    "victory:d=4,o=5,b=280:16d5,16p,32p,16d5,16p,32p,16d5,"
+    "16p,32p,2d5,2a#4,2c5,8d5,4p,8c5,1d5";
 
 /* **************************
       GLOBAL VARIABLES
@@ -63,6 +69,7 @@ int activePlayer; // player whose turn it is
 playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
 void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
   Serial.begin(9600);
   pixels.begin();
   lcd.init();
@@ -90,10 +97,7 @@ void loop() {
     humanTurn_tick();
     break;
   }
-  // drive non-blocking error sound sequence if active
-  if (errorSoundActive) {
-    handleErrorSound();
-  }
+  rtttl::play(); // play current sound
 }
 
 // changes the state and calls the setup function for that state

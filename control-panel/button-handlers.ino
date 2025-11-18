@@ -46,11 +46,12 @@ void handleConfStart() {
     lcdBuffer[0] = "Need at Least";
     lcdBuffer[1] = "2 Players";
     printToLcd();
-    errorSound();
+    playSound(ERROR_SOUND);
   }
 }
 
 void handleTurnStart() {
+  playSound(BUTTON_SOUND);
   Serial.println("Human completed Turn!");
   changeState(WAIT);
 }
@@ -59,7 +60,11 @@ void handleTurnStart() {
          MUTE BUTTON
 ************************** */
 
-void handleMute() { mute = (mute ? 0 : 1); }
+void handleMute() {
+  (mute ? rtttl::begin(BUZZER_PIN, UNMUTE_SOUND)
+        : rtttl::begin(BUZZER_PIN, MUTE_SOUND));
+  mute = !mute;
+}
 
 /* **************************
          DICE BUTTON

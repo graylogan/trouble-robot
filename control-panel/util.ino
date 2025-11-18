@@ -24,9 +24,15 @@ int encodeKey(char key) {
 
 // display victory message on player finish
 void victory(int player) {
+  playSound(VICTORY_SOUND);
   lcdBuffer[0] = prettyPlayerColors[player] + " Has";
   lcdBuffer[1] = "Finished!";
   printToLcd();
+  // block control for victory sequence
+  unsigned long stopTime = millis() + 3500UL;
+  while (millis() < stopTime) {
+    rtttl::play();
+  }
 }
 
 // called by handleConfStart

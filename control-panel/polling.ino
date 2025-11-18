@@ -8,10 +8,10 @@ void pollKeys(void (*handlers[8])(void)) {
   if (handlers[index] == nullptr)
     return;
 
-  // play sound on keypress if not muted (unless mute button)
-  if (!mute || key == 'M')
-    tone(9, 300, 100);
-
+  // play sound unless start or mute button
+  if (index < 4 || index == 5 || index == 7) {
+    playSound(BUTTON_SOUND);
+  }
   // call handler
   handlers[index]();
 }
