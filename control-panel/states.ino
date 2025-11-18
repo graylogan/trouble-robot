@@ -1,6 +1,6 @@
 /*
 States are split into a one-time setup function and a recurring
-tick function. The loop() the tick each iteration.
+tick function.
 */
 
 /* **************************
@@ -33,26 +33,20 @@ void configuration_tick() { pollKeys(confHandlers); }
 /* **************************
          WAITING
 ************************** */
-void waiting_setup() {
-  // could show a waiting message
-  lcdBuffer[0] = "Waiting for";
-  lcdBuffer[1] = "controller...";
-  printToLcd();
-}
+void waiting_setup() {}
 
 void waiting_tick() { readSerial(); }
 
 /* **************************
          BOT
 ************************** */
-// no key input, just listen to serial
 void bot_setup() {
   pixels.clear();
-  updatePlayerLED(activePlayer);
-  updateTurnLCD();
+  updatePlayerTypeLED(activePlayer);
+  showPlayerTurnLCD();
   // always roll dice at start of bot turn
   // dice logic here
-  Serial.println("dice rolled");
+  Serial.println("Bot rolled Dice!");
   changeState(WAIT);
 }
 
@@ -61,10 +55,9 @@ void bot_tick() {}
 /* **************************
          HUMAN ROLL
 ************************** */
-// no serial, just wait for dice press
 void humanRoll_setup() {
   pixels.clear();
-  updatePlayerLED(activePlayer);
+  updatePlayerTypeLED(activePlayer);
   // show prompt to press dice
   lcdBuffer[0] = "Press Dice";
   lcdBuffer[1] = "to roll";
@@ -77,6 +70,8 @@ void humanRoll_tick() { pollKeys(humanRollHandlers); }
          HUMAN TURN
 ************************** */
 void humanTurn_setup() {
+  pixels.clear();
+  updatePlayerTypeLED(activePlayer);
   // indicate player's turn
   lcdBuffer[0] = "Make Your";
   lcdBuffer[1] = "Move";

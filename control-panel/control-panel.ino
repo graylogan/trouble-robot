@@ -5,48 +5,49 @@
 /* **************************
          KEYPAD SETUP
 ************************** */
-
-const uint8_t ROWS = 4;
-const uint8_t COLS = 2;
-char keys[ROWS][COLS] = {{'B', 'S'}, {'R', 'D'}, {'G', 'M'}, {'Y', 'F'}};
-uint8_t colPins[COLS] = {3, 2};
-uint8_t rowPins[ROWS] = {7, 6, 5, 4};
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+const uint8_t KEY_ROWS = 4;
+const uint8_t KEY_COLS = 2;
+const char KEY_LABELS[KEY_ROWS][KEY_COLS] = {
+    {'B', 'S'}, {'R', 'D'}, {'G', 'M'}, {'Y', 'F'}};
+const uint8_t KEY_COL_PINS[KEY_COLS] = {3, 2};
+const uint8_t KEY_ROW_PINS[KEY_ROWS] = {7, 6, 5, 4};
+Keypad keypad = Keypad(makeKeymap(KEY_LABELS), KEY_ROW_PINS, KEY_COL_PINS,
+                       KEY_ROWS, KEY_COLS);
 
 /* **************************
          NEOPIXEL SETUP
 ************************** */
-#define LED_PIN 8
-#define NUM_LEDS 4
-Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
-uint32_t playerTypeLEDs[5] = {
+const int NEOPIXEL_PIN = 8;
+const int NUM_LEDS = 4;
+Adafruit_NeoPixel pixels(NUM_LEDS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+const uint32_t LED_COLORS[5] = {
     pixels.Color(0, 0, 0), pixels.Color(0, 0, 255), pixels.Color(0, 255, 0),
     pixels.Color(255, 128, 0), pixels.Color(255, 0, 0)};
 
 /* **************************
          LCD SETUP
 ************************** */
-#define LCD_ADDR 0x27 // Common I2C LCD address; change if needed
-#define LCD_COLS 16
-#define LCD_ROWS 2
-LiquidCrystal_I2C lcd(LCD_ADDR, LCD_COLS, LCD_ROWS);
+const int LCD_ADDR = 0x27; // Common I2C LCD address; change if needed
+const int LCD_KEY_COLS = 16;
+const int LCD_KEY_ROWS = 2;
+LiquidCrystal_I2C lcd(LCD_ADDR, LCD_KEY_COLS, LCD_KEY_ROWS);
 String lcdBuffer[2]; // store 2 lines
 
 /* **************************
          ENUMS
 ************************** */
 
-// indeces parallel with playerTypeLEDs
+// indeces parallel with LED_COLORS
 enum playerType { NO_PLAYER, HUMAN, EASY, MEDIUM, HARD };
-String prettyPlayerType[] = {"None", "Human", "Easy", "Medium", "Hard"};
+String prettyPlayerTypes[] = {"None", "Human", "Easy", "Medium", "Hard"};
 
 enum playerColor { BLUE_PLAYER, RED_PLAYER, GREEN_PLAYER, YELLOW_PLAYER };
-String prettyPlayerColor[] = {"Blue", "Red", "Green", "Yellow"};
+String prettyPlayerColors[] = {"Blue", "Red", "Green", "Yellow"};
 
 enum State { CONF, WAIT, BOT, HUMAN_ROLL, HUMAN_TURN };
 
 /* **************************
-      ERROR SOUND
+      SOUND VARS
 ************************** */
 bool errorSoundActive = false; // true while the error sound sequence is playing
 uint8_t errorSoundPhase = 0;   // phase of the sound sequence
@@ -92,5 +93,27 @@ void loop() {
   // drive non-blocking error sound sequence if active
   if (errorSoundActive) {
     handleErrorSound();
+  }
+}
+
+// changes the state and calls the setup function for that state
+void changeState(int newState) {
+  state = newState;
+  switch (newState) {
+  case CONF:
+    configuration_setup();
+    break;
+  case WAIT:
+    waiting_setup();
+    break;
+  case BOT:
+    bot_setup();
+    break;
+  case HUMAN_ROLL:
+    humanRoll_setup();
+    break;
+  case HUMAN_TURN:
+    humanTurn_setup();
+    break;
   }
 }
