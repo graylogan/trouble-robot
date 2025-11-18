@@ -44,13 +44,18 @@ void bot_setup() {
   pixels.clear();
   updatePlayerTypeLED(activePlayer);
   showPlayerTurnLCD();
-  // always roll dice at start of bot turn
-  // dice logic here
-  Serial.println("Bot rolled Dice!");
-  changeState(WAIT);
+  rollCount = dice.numRolls;
+  dice.roll(3000);
 }
 
-void bot_tick() {}
+void bot_tick() {
+  dice.tick();
+  // check if dice has been rolled this turn
+  if (dice.numRolls > rollCount) {
+    Serial.println("Bot rolled Dice!");
+    changeState(WAIT);
+  }
+}
 
 /* **************************
          HUMAN ROLL
@@ -62,9 +67,18 @@ void humanRoll_setup() {
   lcdBuffer[0] = "Press Dice";
   lcdBuffer[1] = "to roll";
   printToLcd();
+  rollCount = dice.numRolls;
 }
 
-void humanRoll_tick() { pollKeys(humanRollHandlers); }
+void humanRoll_tick() {
+  pollKeys(humanRollHandlers);
+  dice.tick();
+  // check if dice has been rolled this turn
+  if (dice.numRolls > rollCount) {
+    Serial.println("Human rolled Dice!");
+    changeState(WAIT);
+  }
+}
 
 /* **************************
          HUMAN TURN

@@ -1,3 +1,4 @@
+#include "Dice.h"
 #include <Adafruit_NeoPixel.h>
 #include <Keypad.h>
 #include <LiquidCrystal_I2C.h>
@@ -60,6 +61,14 @@ const char *VICTORY_SOUND =
     "16p,32p,2d5,2a#4,2c5,8d5,4p,8c5,1d5";
 
 /* **************************
+      DICE SETUP
+************************** */
+const int DICE_PIN = 10;
+Dice dice(DICE_PIN);
+// check increase in count to determine roll complettion
+int rollCount;
+
+/* **************************
       GLOBAL VARIABLES
 ************************** */
 bool mute = 0;
@@ -70,6 +79,7 @@ playerType players[4] = {NO_PLAYER, NO_PLAYER, NO_PLAYER, NO_PLAYER};
 
 void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(DICE_PIN, OUTPUT);
   Serial.begin(9600);
   pixels.begin();
   lcd.init();

@@ -70,8 +70,4 @@ void handleMute() {
          DICE BUTTON
 ************************** */
 
-void handleDice() {
-  // dice roll logic here
-  Serial.println("Human rolled dice!");
-  changeState(WAIT);
-}
+void handleDice() { dice.roll(3000); }
