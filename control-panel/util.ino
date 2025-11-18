@@ -45,15 +45,29 @@ void readSerial() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     input.trim(); // remove any \r or whitespace
-    switch (state) {
-    case WAIT:
-      waitSerial(input);
+    char tag = input.charAt(0);
+    int player = input.charAt(1) - '0';
+    bool isBot = players[player] - 1;
+    switch (tag) {
+    case 'R':
+      activePlayer = player;
+      changeState((isBot ? BOT : HUMAN_ROLL));
       break;
-    case BOT:
-      botSerial(input);
+    case 'T':
+      activePlayer = player;
+      if (!isBot)
+        changeState(HUMAN_TURN);
       break;
+    case 'V':
+      victory(player);
     }
   }
+}
+
+void victory(int player) {
+  lcdBuffer[0] = prettyPlayerColor[player] + " Has";
+  lcdBuffer[1] = "Finished!";
+  printToLcd();
 }
 
 // called by handleConfStart
@@ -133,6 +147,7 @@ void printToLcd() {
 }
 
 void changeState(int newState) {
+  state = newState;
   switch (newState) {
   case CONF:
     configuration_setup();
@@ -150,5 +165,4 @@ void changeState(int newState) {
     humanTurn_setup();
     break;
   }
-  state = newState;
 }

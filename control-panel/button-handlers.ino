@@ -52,7 +52,10 @@ void handleConfStart() {
   }
 }
 
-void handleTurnStart() {}
+void handleTurnStart() {
+  Serial.println("Human completed Turn!");
+  changeState(WAIT);
+}
 
 /* **************************
          MUTE BUTTON
@@ -67,5 +70,5 @@ void handleMute() { mute = (mute ? 0 : 1); }
 void handleDice() {
   // dice roll logic here
   Serial.println("Human rolled dice!");
-  changeState(HUMAN_TURN);
+  changeState(WAIT);
 }

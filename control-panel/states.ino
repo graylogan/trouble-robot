@@ -53,12 +53,10 @@ void bot_setup() {
   // always roll dice at start of bot turn
   // dice logic here
   Serial.println("dice rolled");
+  changeState(WAIT);
 }
 
-void bot_tick() {
-  // During bot turns we just read serial updates
-  readSerial();
-}
+void bot_tick() {}
 
 /* **************************
          HUMAN ROLL
