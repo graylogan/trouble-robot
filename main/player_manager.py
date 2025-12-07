@@ -9,14 +9,9 @@ class PlayerManager:
 
     def create_players(self, config):
         """Return a list of player objects from config dict."""
-        pass
         for c in config:
             if config[c]:
               self.players.append(Player(c, config[c]))
-
-    def determine_order(self):
-        """Determine first player by roll and update players list."""
-        pass
 
     def next_player(self):
         """Advance to the next player and return it."""

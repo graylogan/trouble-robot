@@ -1,6 +1,7 @@
 from serial_protocol import ControlPanelProtocol
 from player_manager import PlayerManager
 from board import Board
+from constants import encode_player_color
 
 class Game:
     """Main game loop orchestrator."""
@@ -17,9 +18,10 @@ class Game:
         self.establish_connections()
         config = self.cp.wait_for_config()
         self.players_manager.create_players(config)
-        for p in self.players_manager.players:
-            print(p)
-        self.players_manager.determine_order()
+        print(self.players_manager.players)
+        self.determine_order()
+        print(self.players_manager.players)
+        exit(0)
 
         while not self.game_over and self.players_manager.players:
             player = self.players_manager.players[self.players_manager.current_index]
@@ -40,6 +42,36 @@ class Game:
     
     def roll(self, player):
         """request roll from cp, read value, return value"""
+        self.cp.send_roll_request(encode_player_color[player.color])
+        if self.cp.wait_for_dice_complete():
+            # READ WITH CV HERE
+            return int(input("Enter roll: "))
+        else:
+            raise Exception("roll failed")
 
     def establish_connections(self):
         self.cp.connect()
+
+    def determine_order(self):
+      """Determine first player by roll and update players list."""
+      # get player with highest roll (handles ties)
+      remaining = [p for p in self.players_manager.players]
+      while len(remaining) > 1:
+          rolls = []
+          for p in remaining:
+              roll = self.roll(p)
+              if not rolls or rolls[0][1] == roll:
+                  rolls.append((p, roll))
+              elif roll > rolls[0][1]:
+                  rolls = [(p, roll)]
+              # else do nothing
+          remaining = [r[0] for r in rolls]
+      
+      # remaining order goes clockwise starting from winner
+      ordered = []
+      i = self.players_manager.players.index(remaining[0])
+      numPlayers = len(self.players_manager.players)
+      for _j in range(numPlayers):
+          ordered.append(self.players_manager.players[i])
+          i = (i + 1) % numPlayers
+      self.players_manager.players = ordered
