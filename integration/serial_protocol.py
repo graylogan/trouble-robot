@@ -38,7 +38,7 @@ class ControlPanelProtocol:
     - Line ending: \n
     """
     
-    def __init__(self, port='/dev/ttyACM0', baud_rate=9600, timeout=5):
+    def __init__(self, port="rfc2217://localhost:4000", baud_rate=9600, timeout=5, simulation=True):
         """
         Initialize serial connection to Control Panel.
         
@@ -50,13 +50,21 @@ class ControlPanelProtocol:
         self.port = port
         self.baud_rate = baud_rate
         self.timeout = timeout
+        self.simulation = simulation
         self.serial = None
         self.connected = False
         
     def connect(self):
         """Establish serial connection to Control Panel."""
         try:
-            self.serial = serial.Serial(
+            if self.simulation:
+                self.serial = serial.serial_for_url(
+                    url=self.port,
+                    baudrate=self.baud_rate,
+                    timeout=self.timeout,
+                )
+            else:
+                self.serial = serial.Serial(
                 port=self.port,
                 baudrate=self.baud_rate,
                 timeout=self.timeout,
