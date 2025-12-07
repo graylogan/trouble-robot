@@ -1,6 +1,6 @@
 ARDUINO_CLI ?= arduino-cli
 BOARD ?= arduino:avr:uno
-INO := control-panel.ino
+INO := simulated-control-panel.ino
 SKETCH := $(basename $(INO))
 BUILD_DIR := build
 

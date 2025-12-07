@@ -1,0 +1,5 @@
+[wokwi]
+rfc2217ServerPort = 4000
+version = 1
+firmware = 'build/arduino.avr.uno/simulated-control-panel.ino.hex'
+elf = 'build/arduino.avr.uno/simulated-control-panel.ino.elf'

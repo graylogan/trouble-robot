@@ -22,6 +22,7 @@ static void (*humanTurnHandlers[])(void) = {
          CONFIGURATION STATE
 ************************** */
 void configuration_setup() {
+  playSound(UNMUTE_SOUND);
   // LCD
   lcdBuffer[0] = "Game Setup: Use";
   lcdBuffer[1] = "Player Buttons";
@@ -41,8 +42,7 @@ void waiting_tick() { readSerial(); }
          BOT
 ************************** */
 void bot_setup() {
-  pixels.clear();
-  updatePlayerTypeLED(activePlayer);
+  playSound(UNMUTE_SOUND);
   showPlayerTurnLCD();
   rollCount = dice.numRolls;
   dice.roll(3000);
@@ -61,8 +61,7 @@ void bot_tick() {
          HUMAN ROLL
 ************************** */
 void humanRoll_setup() {
-  pixels.clear();
-  updatePlayerTypeLED(activePlayer);
+  playSound(UNMUTE_SOUND);
   // show prompt to press dice
   lcdBuffer[0] = "Press Dice";
   lcdBuffer[1] = "to roll";
@@ -84,8 +83,7 @@ void humanRoll_tick() {
          HUMAN TURN
 ************************** */
 void humanTurn_setup() {
-  pixels.clear();
-  updatePlayerTypeLED(activePlayer);
+  playSound(UNMUTE_SOUND);
   // indicate player's turn
   lcdBuffer[0] = "Make Your";
   lcdBuffer[1] = "Move";

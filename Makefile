@@ -1,3 +1,3 @@
 .PHONY: all
 all:
-	$(MAKE) -C control-panel
+	$(MAKE) -C simulated-control-panel
