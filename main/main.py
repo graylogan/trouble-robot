@@ -2,7 +2,7 @@
 
 import game as gm
 
-def run():
+def run() -> None:
     game = gm.Game()
     game.run()
 

@@ -8,13 +8,13 @@ class PlayerManager:
         self.players: list[Player] = []
         self.current_index: int = 0
 
-    def create_players(self, config: dict[str, str | None]):
+    def create_players(self, config: dict[str, str | None]) -> list[Player]:
         """Return a list of player objects from config dict."""
         for c in config:
             if config[c]:
               self.players.append(Player(c, config[c], player_color_to_home_index[c]))
 
-    def next_player(self):
+    def next_player(self) -> Player:
         """Advance to the next player and return it."""
         if not self.players:
             return None

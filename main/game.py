@@ -15,7 +15,7 @@ class Game:
         self.game_over: bool = False
         self.roll_value: int = 0
 
-    def run(self):
+    def run(self) -> None:
         """Run the tabletop game."""
         self.establish_connections()
         config: dict[str, str | None] = self.cp.wait_for_config()
@@ -38,7 +38,7 @@ class Game:
 
             self.players_manager.next_player()
     
-    def roll(self, player):
+    def roll(self, player) -> int:
         """request roll from cp, read value, return value"""
         self.cp.send_roll_request(encode_player_color[player.color])
         if self.cp.wait_for_dice_complete():
@@ -46,10 +46,10 @@ class Game:
         else:
             raise Exception("roll failed")
 
-    def establish_connections(self):
+    def establish_connections(self) -> None:
         self.cp.connect()
 
-    def determine_order(self):
+    def determine_order(self) -> None:
       """Determine first player by roll and update players list."""
       # get player with highest roll (handles ties)
       remaining: list[Player] = [p for p in self.players_manager.players]
