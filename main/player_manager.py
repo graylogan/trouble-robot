@@ -1,17 +1,18 @@
 from player import Player
+from constants import player_color_to_home_index
 
 class PlayerManager:
     """Manages players, turn order, and current player."""
 
     def __init__(self):
-        self.players = []
-        self.current_index = 0
+        self.players: list[Player] = []
+        self.current_index: int = 0
 
-    def create_players(self, config):
+    def create_players(self, config: dict[str, str | None]):
         """Return a list of player objects from config dict."""
         for c in config:
             if config[c]:
-              self.players.append(Player(c, config[c]))
+              self.players.append(Player(c, config[c], player_color_to_home_index[c]))
 
     def next_player(self):
         """Advance to the next player and return it."""
