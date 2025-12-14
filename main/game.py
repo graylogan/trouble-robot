@@ -1,8 +1,7 @@
 from serial_protocol import ControlPanelProtocol
 from player_manager import PlayerManager
 from board import Board
-from constants import encode_player_color
-from constants import ROLL_AGAIN
+from constants import encode_player_color, ROLL_AGAIN
 from player import Player
 
 class Game:
@@ -20,6 +19,7 @@ class Game:
         self.establish_connections()
         config: dict[str, str | None] = self.cp.wait_for_config()
         self.players_manager.create_players(config)
+        self.board.populate(self.players_manager.players)
         self.determine_order()
 
         while not self.game_over and self.players_manager.players:
@@ -31,7 +31,7 @@ class Game:
                 self.board.move(player)
                 self.board.update()
 
-            if self.board.check_finish(player):
+            if player.finished:
                 self.cp.send_victory(player)
                 self.players_manager.players.remove(player)
                 self.game_over = self.board.check_game_over(self.players_manager.players)

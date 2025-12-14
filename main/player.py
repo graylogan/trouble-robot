@@ -9,9 +9,11 @@ class Player:
         # Extract color and type
         self.color: str = color
         self.type: str = type
+        self.home = home
         self.pos: int = home
         self.locked: bool = True
         self.traveled: int = 0
+        self.finished = 0
 
     def __repr__(self) -> str:
         return f"<Player color={self.color}, type={self.type}, pos={self.pos}>"

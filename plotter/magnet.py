@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 
-MAGNET_PIN = 11  # BOARD pin 7
+MAGNET_PIN = 11
 
 def initialize_magnet():
     """Set up the GPIO pin for the electromagnet (initially OFF)."""
