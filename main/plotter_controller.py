@@ -3,7 +3,14 @@ from plotter_helpers import send_grbl
 from magnet import turn_on_magnet, turn_off_magnet
 # from constants import GRBL_COORDINATES
 
-GRBL_COORDINATES = []
+# generate coordinate mapping
+X_VALUES = [27, 68, 101, 136, 169, 200, 233, 270]
+Y_VALUES = [14, 53, 85, 120, 158]
+GRBL_COORDINATES: list[list[tuple[str, str]]] = []
+for i, x in enumerate(X_VALUES):
+    GRBL_COORDINATES.append([])
+    for y in Y_VALUES:
+        GRBL_COORDINATES[i].append(("X" + str(x), "Y" + str(y)))
 
 class PlotterController:
     def __init__(self, ser, start_index: tuple[int, int] = (0, 0)):
@@ -42,6 +49,7 @@ class PlotterController:
 
       if x_grbl is not None:
           send_grbl(self.ser, "G0 " + x_grbl)
+          print("MOVE CALL RETURNED")
           time.sleep(5)
 
       if y_grbl is not None:

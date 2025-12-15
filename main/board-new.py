@@ -1,6 +1,7 @@
 from player import Player
 from typing import Optional
 from constants import BOARD_X, BOARD_Y
+from plotter_controller import PlotterController
 
 DIRECTION_MAP = {
     "UP":    (False, False),
@@ -8,8 +9,6 @@ DIRECTION_MAP = {
     "LEFT":  (True, True),
     "RIGHT": (True, False),
 }
-
-INDEX_MAP: 
 
 class board:
   def __init__(self):
@@ -39,7 +38,7 @@ def direction_transformation(p_trans: tuple[bool, bool], direction: str) -> tupl
     return tuple(a ^ b for a, b in zip(p_trans, d_trans))
 
 
-def low_level_move(player: Player, direction: str, step: int, p_trans: tuple[bool, bool]):
+def low_level_move(player: Player, direction: str, step: int, p_trans: tuple[bool, bool], p: PlotterController):
     # calculate target
     trans = direction_transformation(p_trans, direction)
     sign = -1 if trans[1] else 1
@@ -52,4 +51,8 @@ def low_level_move(player: Player, direction: str, step: int, p_trans: tuple[boo
     else:         # move along x-axis
         target = (x + sign * step, y)
 
-    
+    # go to player
+    p.go_to((x, y))
+
+    # carry to target
+    p.carry_to(target)

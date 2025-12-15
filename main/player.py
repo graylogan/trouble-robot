@@ -11,6 +11,7 @@ class Player:
         self.type: str = type
         self.home = home
         self.pos: int = home
+        self.gridPos = {"x": 0, "y": 0}
         self.locked: bool = True
         self.traveled: int = 0
         self.finished = 0
