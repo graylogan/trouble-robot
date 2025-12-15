@@ -12,7 +12,29 @@ DIRECTION_MAP = {
 
 class board:
   def __init__(self):
-    board: list[list[Optional[Player]]] = [[None] * BOARD_Y] * BOARD_X
+    self.board: list[list[Optional[Player]]] = [[None] * BOARD_Y for _ in range(BOARD_X)]
+
+  def populate(self, players: list[Player]):
+    """Place all players on the board at their home positions."""
+    for p in players:
+      x, y = p.pos
+      self.board[x][y] = p
+
+  def get_move_desc(self, player: Player, roll: int) -> Optional[tuple[tuple[int, int], tuple[int, int]]]:
+    """Calculate the move description (from position, to position) for a given roll."""
+    if player.locked:
+      player.locked = roll != 6
+      return None
+    # For 2D board, we need to implement the path logic
+    # This is a simplified version - adjust based on your actual game rules
+    from_pos = player.pos
+    # Calculate next position based on roll (this depends on your board layout)
+    to_pos = from_pos  # Placeholder - implement your movement logic
+    return (from_pos, to_pos)
+
+  def check_game_over(self, players: list[Player]) -> bool:
+    """Return True if only 1 player remains."""
+    return len(players) <= 1
 
   def side_perspective_transformation(player: Player) -> tuple[bool, bool]:
     """
