@@ -10,7 +10,7 @@ class Game:
     """Main game loop orchestrator."""
 
     def __init__(self):
-        self.cp = ControlPanelProtocol()
+        self.cp = ControlPanelProtocol(simulation=False, port="/dev/ttyACM0")
         self.board = Board()
         self.players_manager = PlayerManager()
         self.game_over: bool = False
