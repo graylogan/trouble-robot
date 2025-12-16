@@ -14,7 +14,7 @@ def main():
     
     # Create some hardcoded player objects
     print("Creating hardcoded player objects...")
-    player1 = Player(color="RED", type="easy", home=(3, 0))
+    player1 = Player(color="RED", type="easy", home=(5, 0))
     player2 = Player(color="BLUE", type="easy", home=(0, 2))
     player3 = Player(color="GREEN", type="easy", home=(0, 0))
     
@@ -68,7 +68,7 @@ def main():
         else:
             # Move two steps to the right relative to the player's side
             print("\nCalling test_board.low_level_move(player1, 'RIGHT', 2, p_trans, plotter)")
-            test_board.low_level_move(player1, "RIGHT", 2, p_trans, plotter)
+            test_board.low_level_move(player1, "UP", 2, p_trans, plotter)
             print("low_level_move() completed")
         
     except Exception as e:
