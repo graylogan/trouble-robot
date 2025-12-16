@@ -13,7 +13,7 @@ DIRECTION_MAP = {
     "RIGHT": (True, False),
 }
 
-class board:
+class Board:
   def __init__(self):
     self.board: list[list[Optional[Player]]] = [[None] * BOARD_Y for _ in range(BOARD_X)]
 
