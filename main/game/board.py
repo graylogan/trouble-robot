@@ -74,8 +74,7 @@ class Board:
             return None
         target = self._track_step(player.pos, roll)
         t_piece = self.board[target[0]][target[1]]
-        t_home = t_piece.home
-        if t_piece and self.board[t_home[0]][t_home[1]]:
+        if t_piece and self.board[t_piece.home[0]][t_piece.home[1]]:
             # can't capture because home is blocked
             return None
         return (player.pos, target)
@@ -84,7 +83,9 @@ class Board:
         """
         returns true if the player moved to new space
         """
-        target = self._track_step(p.pos, roll)
+        target = self.get_move_desc(p, roll)
+        if not target:
+            return 0
 
         # can decrease captured step until clear
         if captured:

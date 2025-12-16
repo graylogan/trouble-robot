@@ -13,6 +13,7 @@ class PlayerManager:
         """Return a list of player objects from config dict."""
         for c in config:
             if config[c]:
+                print("!!!", type(c), c)
                 self.players.append(Player(c, config[c], PLAYER_TO_HOME[c]))
 
     def next_player(self) -> Player:

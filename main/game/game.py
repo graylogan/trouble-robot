@@ -22,7 +22,10 @@ class Game:
         config: dict[str, str | None] = self.cp.wait_for_config()
         self.players_manager.create_players(config)
         self.board.populate(self.players_manager.players)
+        print("GAME: created players. Determining order...")
         self.determine_order()
+        print("GAME: order determined.")
+
 
         while not self.game_over and self.players_manager.players:
             player: Player = self.players_manager.players[
@@ -31,7 +34,9 @@ class Game:
             self.roll_value = ROLL_AGAIN
 
             while self.roll_value == ROLL_AGAIN:
+                print("GAME: rolling...")
                 self.roll_value = self.roll(player)
+                print("GAME: moving...")
                 moved = self.board.move(player, self.roll_value)
                 # self.board.update() # would implement CV here
 
@@ -49,7 +54,9 @@ class Game:
         """request roll from cp, read value, return value"""
         self.cp.send_roll_request(ENCODE_PLAYER_COLOR[player.color])
         if self.cp.wait_for_dice_complete():
-            return randint(1, 6)
+            roll = randint(1, 6)
+            print("ROLL:", roll)
+            return roll
         else:
             raise Exception("roll failed")
 

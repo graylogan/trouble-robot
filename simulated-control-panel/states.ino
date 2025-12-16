@@ -47,7 +47,7 @@ void bot_setup() {
   updatePlayerTypeLED(activePlayer);
   showPlayerTurnLCD();
   rollCount = dice.numRolls;
-  dice.roll(3000);
+  dice.roll(100);
 }
 
 void bot_tick() {

@@ -9,6 +9,7 @@ import serial
 import time
 from typing import Optional, Dict
 from enum import Enum
+from game.constants import PlayerColor
 
 
 class PlayerType(Enum):
@@ -19,15 +20,6 @@ class PlayerType(Enum):
     EASY = 2
     MEDIUM = 3
     HARD = 4
-
-
-class PlayerColor(Enum):
-    """Player colors matching Arduino enum"""
-
-    BLUE = 0
-    RED = 1
-    GREEN = 2
-    YELLOW = 3
 
 
 class ControlPanelProtocol:
@@ -263,6 +255,7 @@ class ControlPanelProtocol:
             if panel.wait_for_dice_complete():
                 dice_value = vision.read_dice()
         """
+        print("!!!", type(color), color)
         player_index = color.value
         self._send_message(f"R{player_index}")
 
