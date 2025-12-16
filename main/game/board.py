@@ -18,6 +18,25 @@ class Board:
             x, y = p.pos
             self.board[x][y] = p
 
+    def test_move(self, players: list[Player], roll: int, player: Player) -> int:
+        """Test helper: reset board to provided state, then move the selected player."""
+        if player not in players:
+            raise ValueError("player must be one of the provided players")
+
+        # reset board then place each player at its current coordinates
+        self.board = [[None for _ in range(BOARD_Y)] for _ in range(BOARD_X)]
+        for p in players:
+            x, y = p.pos
+            if not (0 <= x < BOARD_X and 0 <= y < BOARD_Y):
+                raise ValueError(f"player {p} position {p.pos} out of bounds")
+            if self.board[x][y] is not None:
+                raise ValueError(
+                    f"multiple players share position {p.pos}: {self.board[x][y]} and {p}"
+                )
+            self.board[x][y] = p
+
+        return self.move(player, roll)
+
     def _track_step(self, pos: tuple[int, int], roll: int) -> tuple[int, int]:
         x, y = pos
         while roll > 0:
@@ -131,11 +150,20 @@ class Board:
             i += 1
         if not blockers:
             self._move_alpha(p, roll)
+        elif len(sides) == 1 and corners == 0:
+            self._move_A(p, roll, blockers)
         else:
             raise RuntimeError("Cannot handle scenario with blockers")
 
     def _move_alpha(self, p: Player, roll: int):
         self._track_move(p, roll)
+
+    def _move_A(self, p: Player, roll: int, blockers: list[Player]):
+        for b in blockers:
+            self.low_level_move(b, "UP", 2)
+        self._track_move(p, roll)
+        for b in blockers:
+            self.low_level_move(b, "DOWN", 2)
 
     def _onCorner(self, p: Player) -> bool:
         return p.pos in [(0, 0), (0, 4), (7, 4), (7, 0)]

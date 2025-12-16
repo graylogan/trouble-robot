@@ -86,3 +86,5 @@ class Game:
             ordered.append(self.players_manager.players[i])
             i = (i + 1) % numPlayers
         self.players_manager.players = ordered
+
+    
