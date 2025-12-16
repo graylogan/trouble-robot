@@ -54,7 +54,7 @@ class Game:
         """request roll from cp, read value, return value"""
         self.cp.send_roll_request(ENCODE_PLAYER_COLOR[player.color])
         if self.cp.wait_for_dice_complete():
-            roll = randint(1, 6)
+            roll = int(input("roll ->")) # randint(1, 6)
             print("ROLL:", roll)
             return roll
         else:
