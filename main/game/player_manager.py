@@ -1,6 +1,6 @@
-from player import Player
-from constants import player_color_to_home_index
+from game.player import Player
 
+PLAYER_TO_HOME = {"BLUE": (0, 0), "RED": (0, 4), "GREEN": (7, 4), "YELLOW": (7, 0)}
 
 class PlayerManager:
     """Manages players, turn order, and current player."""
@@ -13,7 +13,7 @@ class PlayerManager:
         """Return a list of player objects from config dict."""
         for c in config:
             if config[c]:
-              self.players.append(Player(c, config[c], player_color_to_home_index[c]))
+              self.players.append(Player(c, config[c], PLAYER_TO_HOME[c]))
 
     def next_player(self) -> Player:
         """Advance to the next player and return it."""

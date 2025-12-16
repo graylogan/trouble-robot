@@ -1,6 +1,6 @@
 import time
 import serial
-from magnet import Magnet
+from game.magnet import Magnet
 
 # generate coordinate mapping
 X_VALUES = [27, 68, 101, 136, 169, 200, 233, 270]

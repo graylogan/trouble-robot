@@ -1,7 +1,7 @@
-from player import Player
+from game.player import Player
 from typing import Optional
-from game import ROLL_AGAIN
-from plotter_controller import PlotterController
+from game.game import ROLL_AGAIN
+from game.plotter import Plotter
 
 BOARD_X = 8
 BOARD_Y = 5
@@ -62,7 +62,7 @@ class board:
       return tuple(a ^ b for a, b in zip(p_trans, d_trans))
 
 
-  def low_level_move(self, player: Player, direction: str, step: int, p_trans: tuple[bool, bool], p: PlotterController):
+  def low_level_move(self, player: Player, direction: str, step: int, p_trans: tuple[bool, bool], p: Plotter):
       # calculate target
       trans = self.direction_transformation(p_trans, direction)
       sign = -1 if trans[1] else 1

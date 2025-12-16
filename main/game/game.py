@@ -1,9 +1,9 @@
-from serial_protocol import ControlPanelProtocol
-from player_manager import PlayerManager
-from board import Board
-from player import Player
+from game.serial_protocol import ControlPanelProtocol
+from game.player_manager import PlayerManager
+from game.board import Board
+from game.player import Player
 
-encode_player_color = {"BLUE": PlayerColor.BLUE, "RED": PlayerColor.RED, "GREEN": PlayerColor.GREEN, "YELLOW": PlayerColor.YELLOW}
+encode_player_color = {"BLUE": 0, "RED": 1, "GREEN": 2, "YELLOW": 3}
 ROLL_AGAIN: int = 6
 
 class Game:
