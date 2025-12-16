@@ -57,8 +57,12 @@ class Board:
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
     
-    def _calc_distance(self) -> int:
-        pass
+    def _calc_distance(self, start, stop) -> int:
+        distance = 0
+        while start != stop:
+            start = self._track_step(start, 1)
+            distance += 1
+        return distance
 
     def get_move_desc(
         self, player: Player, roll: int
