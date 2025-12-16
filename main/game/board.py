@@ -1,7 +1,10 @@
 from player import Player
 from typing import Optional
-from constants import BOARD_X, BOARD_Y
+from game import ROLL_AGAIN
 from plotter_controller import PlotterController
+
+BOARD_X = 8
+BOARD_Y = 5
 
 DIRECTION_MAP = {
     "UP":    (False, False),
@@ -23,7 +26,7 @@ class board:
   def get_move_desc(self, player: Player, roll: int) -> Optional[tuple[tuple[int, int], tuple[int, int]]]:
     """Calculate the move description (from position, to position) for a given roll."""
     if player.locked:
-      player.locked = roll != 6
+      player.locked = roll != ROLL_AGAIN
       return None
     # For 2D board, we need to implement the path logic
     # This is a simplified version - adjust based on your actual game rules
@@ -40,41 +43,40 @@ class board:
     """
     (swap x/y, swap sign)
     """
-    pos = player.trackPos
-    if (pos < BOARD_Y):
+    x, y = player.pos
+    if x == 0:  # Bottom
       return (False, False)
-    elif (pos < BOARD_Y + BOARD_X - 1):
-      return (True, True)
-    elif (pos < 2 * BOARD_Y + BOARD_X - 2):
-      return (True, False)
-    else:
+    elif x == BOARD_X - 1:  # Top
       return (False, True)
-    
+    elif y == BOARD_Y - 1:  # Right
+      return (True, True)
+    else:  # Left (y == 0)
+      return (True, False)
+  
+  def direction_transformation(self, p_trans: tuple[bool, bool], direction: str) -> tuple[bool, bool]:
+      try:
+          d_trans = DIRECTION_MAP[direction]
+      except KeyError:
+          raise ValueError(f"Invalid direction: {direction}")
 
-def direction_transformation(p_trans: tuple[bool, bool], direction: str) -> tuple[bool, bool]:
-    try:
-        d_trans = DIRECTION_MAP[direction]
-    except KeyError:
-        raise ValueError(f"Invalid direction: {direction}")
-
-    return tuple(a ^ b for a, b in zip(p_trans, d_trans))
+      return tuple(a ^ b for a, b in zip(p_trans, d_trans))
 
 
-def low_level_move(player: Player, direction: str, step: int, p_trans: tuple[bool, bool], p: PlotterController):
-    # calculate target
-    trans = direction_transformation(p_trans, direction)
-    sign = -1 if trans[1] else 1
+  def low_level_move(self, player: Player, direction: str, step: int, p_trans: tuple[bool, bool], p: PlotterController):
+      # calculate target
+      trans = self.direction_transformation(p_trans, direction)
+      sign = -1 if trans[1] else 1
 
-    x = player.gridPos["x"]
-    y = player.gridPos["y"]
+      x = player.gridPos["x"]
+      y = player.gridPos["y"]
 
-    if trans[0]:  # move along y-axis
-        target = (x, y + sign * step)
-    else:         # move along x-axis
-        target = (x + sign * step, y)
+      if trans[0]:  # move along y-axis
+          target = (x, y + sign * step)
+      else:         # move along x-axis
+          target = (x + sign * step, y)
 
-    # go to player
-    p.go_to((x, y))
+      # go to player
+      p.go_to((x, y))
 
-    # carry to target
-    p.carry_to(target)
+      # carry to target
+      p.carry_to(target)

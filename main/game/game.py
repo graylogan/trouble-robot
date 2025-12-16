@@ -1,8 +1,10 @@
 from serial_protocol import ControlPanelProtocol
 from player_manager import PlayerManager
 from board import Board
-from constants import encode_player_color, ROLL_AGAIN
 from player import Player
+
+encode_player_color = {"BLUE": PlayerColor.BLUE, "RED": PlayerColor.RED, "GREEN": PlayerColor.GREEN, "YELLOW": PlayerColor.YELLOW}
+ROLL_AGAIN: int = 6
 
 class Game:
     """Main game loop orchestrator."""

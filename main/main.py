@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import game as gm
-
+from game.game import Game
 def run() -> None:
-    game = gm.Game()
+    game = Game()
     game.run()
 
 if __name__ == "__main__":

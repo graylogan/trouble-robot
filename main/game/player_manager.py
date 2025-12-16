@@ -1,6 +1,7 @@
 from player import Player
 from constants import player_color_to_home_index
 
+
 class PlayerManager:
     """Manages players, turn order, and current player."""
 
