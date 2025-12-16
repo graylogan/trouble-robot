@@ -35,6 +35,12 @@ class Board:
     to_pos = from_pos  # Placeholder - implement your movement logic
     return (from_pos, to_pos)
 
+  def move() -> bool:
+    """
+    returns true if the player moved to new space
+    """
+    pass
+  
   def check_game_over(self, players: list[Player]) -> bool:
     """Return True if only 1 player remains."""
     return len(players) <= 1

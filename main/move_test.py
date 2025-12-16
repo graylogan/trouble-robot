@@ -76,6 +76,7 @@ def main():
         import traceback
         traceback.print_exc()
     plotter.close()
+    GPIO.cleanup()
     print("\n=== Test Complete ===")
 
 if __name__ == "__main__":

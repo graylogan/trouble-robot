@@ -1,6 +1,5 @@
 from game.player import Player
-
-PLAYER_TO_HOME = {"BLUE": (0, 0), "RED": (0, 4), "GREEN": (7, 4), "YELLOW": (7, 0)}
+from game.constants import PLAYER_TO_HOME
 
 class PlayerManager:
     """Manages players, turn order, and current player."""

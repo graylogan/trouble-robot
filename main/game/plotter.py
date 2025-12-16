@@ -1,15 +1,7 @@
 import time
 import serial
 from game.magnet import Magnet
-
-# generate coordinate mapping
-X_VALUES = [27, 68, 101, 136, 169, 200, 233, 270]
-Y_VALUES = [14, 53, 85, 120, 158]
-GRBL_COORDINATES: list[list[tuple[str, str]]] = []
-for i, x in enumerate(X_VALUES):
-    GRBL_COORDINATES.append([])
-    for y in Y_VALUES:
-        GRBL_COORDINATES[i].append(("X" + str(x), "Y" + str(y)))
+from game.constants import GRBL_COORDINATES, BASE_SLEEP, UNIT_SLEEP
 
 class Plotter:
     def __init__(
@@ -50,11 +42,12 @@ class Plotter:
         Safely close the plotter serial port, returning to (0,0).
         """
         if self.ser is not None and self.ser.is_open:
+            distances = self._target_distance((0, 0))
             # Return to (0,0) at the end
             self.send_grbl("G0 X0")
-            time.sleep(1)
+            time.sleep(BASE_SLEEP + distances[0] * UNIT_SLEEP)
             self.send_grbl("G0 Y0")
-            time.sleep(1)
+            time.sleep(BASE_SLEEP + distances[1] * UNIT_SLEEP)
             print("[PLOTTER] Closing serial port")
             self.ser.close()
 
@@ -123,6 +116,7 @@ class Plotter:
 
     def go_to_grbl(self, x_grbl: str | None = None, y_grbl: str | None = None):
       """
+      FOR DEBUGGING ONLY
       Move plotter directly to explicit GRBL coordinates with magnet OFF.
 
       Example:
@@ -142,6 +136,16 @@ class Plotter:
           self.send_grbl("G0 " + y_grbl)
           time.sleep(5)
 
+    def _target_distance(self, target_index: tuple[int, int]) -> tuple[float, float]:
+        """
+        Calculate the absolute distance between current and target GRBL coordinates.
+        
+        Returns:
+            tuple of (distance_x, distance_y)
+        """
+        target_x, target_y = self._index_to_grbl(target_index)
+        current_x, current_y = self._index_to_grbl(self.current_index)
+        return (abs(float(target_x) - float(current_x)), abs(float(target_y) - float(current_y)))
 
     def go_to(self, target_index: tuple[int, int]):
         """
@@ -152,12 +156,12 @@ class Plotter:
             return
 
         target_x, target_y = self._index_to_grbl(target_index)
-
+        distances = self._target_distance(target_index)
         self.send_grbl("G0 " + target_x)
-        time.sleep(5)
+        time.sleep(BASE_SLEEP + distances[0] * UNIT_SLEEP)
 
         self.send_grbl("G0 " + target_y)
-        time.sleep(5)
+        time.sleep(BASE_SLEEP + distances[1] * UNIT_SLEEP)
 
         self.current_index = target_index
 
@@ -171,22 +175,23 @@ class Plotter:
 
         current_x, current_y = self.current_index
         target_x, target_y = target_index
+        distances = self._target_distance(target_index)
         x_grbl, y_grbl = self._index_to_grbl(target_index)
 
         if self.magnet is not None:
             self.magnet.on()
-            time.sleep(0.5)
+            time.sleep(0.2)
 
         try:
             # Y movement only
             if current_x == target_x and current_y != target_y:
                 self.send_grbl("G0 " + y_grbl)
-                time.sleep(5)
+                time.sleep(BASE_SLEEP + distances[1] * UNIT_SLEEP)
 
             # X movement only
             elif current_y == target_y and current_x != target_x:
                 self.send_grbl("G0 " + x_grbl)
-                time.sleep(5)
+                time.sleep(BASE_SLEEP + distances[0] * UNIT_SLEEP)
 
             else:
                 raise RuntimeError(
