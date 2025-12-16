@@ -10,6 +10,7 @@ class Board:
             [None] * BOARD_Y for _ in range(BOARD_X)
         ]
         self.plotter = Plotter(magnet_pin=MAGNET_PIN)
+        self.plotter.go_to((0, 0))
 
     def populate(self, players: list[Player]):
         """Place all players on the board at their home positions."""
@@ -45,18 +46,22 @@ class Board:
                 move = min(roll, 4 - y)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
+                x, y = p.pos
             if y == 4 and 0 <= x < 7 and roll > 0:  # left
                 move = min(roll, 7 - x)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
+                x, y = p.pos
             if x == 7 and 0 < y <= 4 and roll > 0:  # top
                 move = min(roll, y)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
+                x, y = p.pos
             if y == 0 and 0 < x <= 7 and roll > 0:  # left
                 move = min(roll, x)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
+                x, y = p.pos
 
     def _calc_distance(self, start, stop) -> int:
         distance = 0
@@ -83,9 +88,10 @@ class Board:
         """
         returns true if the player moved to new space
         """
-        target = self.get_move_desc(p, roll)
-        if not target:
+        desc = self.get_move_desc(p, roll)
+        if not desc:
             return 0
+        target = desc[1]
 
         # can decrease captured step until clear
         if captured:
@@ -122,13 +128,14 @@ class Board:
                 else:
                     # value doesn't matter here, just uniqueness
                     sides.add(self.side_perspective_transformation(piece))
+            i += 1
         if not blockers:
-            self.move_alpha(piece, roll)
+            self._move_alpha(p, roll)
         else:
             raise RuntimeError("Cannot handle scenario with blockers")
 
     def _move_alpha(self, p: Player, roll: int):
-        pass
+        self._track_move(p, roll)
 
     def _onCorner(self, p: Player) -> bool:
         return p.pos in [(0, 0), (0, 4), (7, 4), (7, 0)]
@@ -142,14 +149,14 @@ class Board:
         (swap x/y, swap sign)
         """
         x, y = player.pos
-        if x == 0:  # Bottom
+        if x == 0 and y < 4:  # Bottom
             return (False, False)
-        elif x == BOARD_X - 1:  # Top
+        elif x == 7 and y > 0:  # Top
             return (False, True)
-        elif y == BOARD_Y - 1:  # Right
-            return (True, True)
-        else:  # Left (y == 0)
+        elif y == 0 and x > 0:  # Right
             return (True, False)
+        else:  # Left (y == 0)
+            return (True, True)
 
     def direction_transformation(
         self, p_trans: tuple[bool, bool], direction: str
@@ -158,8 +165,33 @@ class Board:
             d_trans = DIRECTION_MAP[direction]
         except KeyError:
             raise ValueError(f"Invalid direction: {direction}")
-
-        return tuple(a ^ b for a, b in zip(p_trans, d_trans))
+        # A'B'D+A'BD'+AB'CD'+ABCD+B'C'D+BC'D'
+        a, b = p_trans
+        c, d = d_trans
+        x = a ^ c
+        s = (
+            not a
+            and not b
+            and d
+            or not a
+            and b
+            and not d
+            or a
+            and not b
+            and c
+            and not d
+            or a
+            and b
+            and c
+            and d
+            or not b
+            and not c
+            and d
+            or b
+            and not c
+            and not d
+        )
+        return (x, s)
 
     def low_level_move(
         self,
@@ -183,7 +215,12 @@ class Board:
 
         p = self.plotter
         # go to player
+        print("PLOTTER: moving to player at", player.pos)
         p.go_to((x, y))
 
         # carry to target
+        print("PLOTTER: carrying to", target)
+        self.board[x][y] = None
         p.carry_to(target)
+        player.pos = target
+        self.board[target[0]][target[1]] = player

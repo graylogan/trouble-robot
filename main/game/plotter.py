@@ -106,6 +106,11 @@ class Plotter:
         self.send_grbl("$X")  # unlock
         self.send_grbl("G92 X0 Y0")  # set current pos as (0,0)
         self.send_grbl("G90")  # absolute positioning
+        home = self._index_to_grbl((0, 0))
+        self.send_grbl("G0 " + home[0])
+        time.sleep(BASE_SLEEP + 100 * UNIT_SLEEP)
+        self.send_grbl("G0 " + home[1])
+        time.sleep(BASE_SLEEP + 100 * UNIT_SLEEP)
 
     # -------------------------
     # Internal helpers
@@ -151,8 +156,8 @@ class Plotter:
         target_x, target_y = self._index_to_grbl(target_index)
         current_x, current_y = self._index_to_grbl(self.current_index)
         return (
-            abs(float(target_x) - float(current_x)),
-            abs(float(target_y) - float(current_y)),
+            abs(float(target_x[1:]) - float(current_x[1:])),
+            abs(float(target_y[1:]) - float(current_y[1:])),
         )
 
     def go_to(self, target_index: tuple[int, int]):

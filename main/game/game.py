@@ -26,8 +26,8 @@ class Game:
         self.determine_order()
         print("GAME: order determined.")
 
-
         while not self.game_over and self.players_manager.players:
+            print(self.board.board)
             player: Player = self.players_manager.players[
                 self.players_manager.current_index
             ]
@@ -54,7 +54,7 @@ class Game:
         """request roll from cp, read value, return value"""
         self.cp.send_roll_request(ENCODE_PLAYER_COLOR[player.color])
         if self.cp.wait_for_dice_complete():
-            roll = int(input("roll ->")) # randint(1, 6)
+            roll = int(input("roll ->"))  # randint(1, 6)
             print("ROLL:", roll)
             return roll
         else:

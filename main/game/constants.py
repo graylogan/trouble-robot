@@ -1,4 +1,5 @@
 from enum import Enum
+
 ROLL_AGAIN = 6
 
 # generate coordinate mapping
@@ -14,7 +15,8 @@ PLAYER_TO_HOME = {"BLUE": (0, 0), "RED": (0, 4), "GREEN": (7, 4), "YELLOW": (7, 
 
 # plotter sleeps
 BASE_SLEEP = 1
-UNIT_SLEEP = 0.15
+UNIT_SLEEP = 0.015
+
 
 class PlayerColor(Enum):
     """Player colors matching Arduino enum"""
@@ -23,7 +25,14 @@ class PlayerColor(Enum):
     RED = 1
     GREEN = 2
     YELLOW = 3
-ENCODE_PLAYER_COLOR = {"BLUE": PlayerColor.BLUE, "RED": PlayerColor.RED, "GREEN": PlayerColor.GREEN, "YELLOW": PlayerColor.YELLOW}
+
+
+ENCODE_PLAYER_COLOR = {
+    "BLUE": PlayerColor.BLUE,
+    "RED": PlayerColor.RED,
+    "GREEN": PlayerColor.GREEN,
+    "YELLOW": PlayerColor.YELLOW,
+}
 
 MAGNET_PIN = 11
 
@@ -33,6 +42,6 @@ BOARD_Y = 5
 DIRECTION_MAP = {
     "UP": (False, False),
     "DOWN": (False, True),
-    "LEFT": (True, True),
-    "RIGHT": (True, False),
+    "LEFT": (True, False),
+    "RIGHT": (True, True),
 }
