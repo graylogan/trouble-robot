@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 
+
 class Magnet:
     def __init__(self, pin: int):
         """Magnet controller for a single GPIO pin.
@@ -24,5 +25,6 @@ class Magnet:
         """De-energize the magnet (LOW)."""
         GPIO.output(self.pin, GPIO.LOW)
         print("turn off magnet")
+
 
 __all__ = ["Magnet"]

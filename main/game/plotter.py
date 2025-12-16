@@ -3,6 +3,7 @@ import serial
 from game.magnet import Magnet
 from game.constants import GRBL_COORDINATES, BASE_SLEEP, UNIT_SLEEP
 
+
 class Plotter:
     def __init__(
         self,
@@ -78,10 +79,12 @@ class Plotter:
         print(f"\n--- {label} ---")
 
         if self.ser is None or not self.ser.is_open:
-            raise RuntimeError("report_position called with a closed or None serial port")
+            raise RuntimeError(
+                "report_position called with a closed or None serial port"
+            )
 
         self.ser.write(b"?")
-        time.sleep(0.2)   # wait for GRBL to respond
+        time.sleep(0.2)  # wait for GRBL to respond
         resp = self.ser.read_all().decode("ascii", errors="ignore")
         print(resp.strip())
 
@@ -90,7 +93,9 @@ class Plotter:
         Wake up GRBL, unlock, and set coordinate mode.
         """
         if self.ser is None or not self.ser.is_open:
-            raise RuntimeError("plotter_initialization called with a closed or None serial port")
+            raise RuntimeError(
+                "plotter_initialization called with a closed or None serial port"
+            )
 
         # Wake up GRBL
         self.ser.write(b"\r\n\r\n")
@@ -98,9 +103,9 @@ class Plotter:
         self.ser.reset_input_buffer()
 
         # Unlock GRBL and set coordinates
-        self.send_grbl("$X")        # unlock
-        self.send_grbl("G92 X0 Y0") # set current pos as (0,0)
-        self.send_grbl("G90")       # absolute positioning
+        self.send_grbl("$X")  # unlock
+        self.send_grbl("G92 X0 Y0")  # set current pos as (0,0)
+        self.send_grbl("G90")  # absolute positioning
 
     # -------------------------
     # Internal helpers
@@ -115,37 +120,40 @@ class Plotter:
     # -------------------------
 
     def go_to_grbl(self, x_grbl: str | None = None, y_grbl: str | None = None):
-      """
-      FOR DEBUGGING ONLY
-      Move plotter directly to explicit GRBL coordinates with magnet OFF.
+        """
+        FOR DEBUGGING ONLY
+        Move plotter directly to explicit GRBL coordinates with magnet OFF.
 
-      Example:
-          go_to_grbl("X120.0", "Y45.0")
-          go_to_grbl(x_grbl="X120.0")
-          go_to_grbl(y_grbl="Y45.0")
-      """
-      if x_grbl is None and y_grbl is None:
-          return
+        Example:
+            go_to_grbl("X120.0", "Y45.0")
+            go_to_grbl(x_grbl="X120.0")
+            go_to_grbl(y_grbl="Y45.0")
+        """
+        if x_grbl is None and y_grbl is None:
+            return
 
-      if x_grbl is not None:
-          self.send_grbl("G0 " + x_grbl)
-          print("MOVE CALL RETURNED")
-          time.sleep(5)
+        if x_grbl is not None:
+            self.send_grbl("G0 " + x_grbl)
+            print("MOVE CALL RETURNED")
+            time.sleep(5)
 
-      if y_grbl is not None:
-          self.send_grbl("G0 " + y_grbl)
-          time.sleep(5)
+        if y_grbl is not None:
+            self.send_grbl("G0 " + y_grbl)
+            time.sleep(5)
 
     def _target_distance(self, target_index: tuple[int, int]) -> tuple[float, float]:
         """
         Calculate the absolute distance between current and target GRBL coordinates.
-        
+
         Returns:
             tuple of (distance_x, distance_y)
         """
         target_x, target_y = self._index_to_grbl(target_index)
         current_x, current_y = self._index_to_grbl(self.current_index)
-        return (abs(float(target_x) - float(current_x)), abs(float(target_y) - float(current_y)))
+        return (
+            abs(float(target_x) - float(current_x)),
+            abs(float(target_y) - float(current_y)),
+        )
 
     def go_to(self, target_index: tuple[int, int]):
         """
