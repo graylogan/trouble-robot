@@ -1,6 +1,6 @@
 from game.player import Player
 from typing import Optional
-from game.game import ROLL_AGAIN
+from game.constants import ROLL_AGAIN
 from game.plotter import Plotter
 
 BOARD_X = 8

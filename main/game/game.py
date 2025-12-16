@@ -2,9 +2,9 @@ from game.serial_protocol import ControlPanelProtocol
 from game.player_manager import PlayerManager
 from game.board import Board
 from game.player import Player
+from game.constants import ROLL_AGAIN
 
 encode_player_color = {"BLUE": 0, "RED": 1, "GREEN": 2, "YELLOW": 3}
-ROLL_AGAIN: int = 6
 
 class Game:
     """Main game loop orchestrator."""
