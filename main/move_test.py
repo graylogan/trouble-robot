@@ -5,7 +5,7 @@ Test driver script for testing player movement using the game classes.
 
 from game.player import Player
 from game.plotter import Plotter
-from game.board import board
+from game.board import Board
 
 def main():
     print("=== Game Movement Test Driver ===\n")
@@ -32,7 +32,7 @@ def main():
     
     # Initialize board object
     print("Initializing board...")
-    test_board = board()
+    test_board = Board()
     print("  Board initialized (8x5 grid)\n")
     
     # Manually put players on the board at their home positions
