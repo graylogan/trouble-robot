@@ -6,8 +6,10 @@ Test driver script for testing player movement using the game classes.
 from game.player import Player
 from game.plotter import Plotter
 from game.board import Board
+import RPi.GPIO as GPIO
 
 def main():
+    GPIO.setmode(GPIO.BOARD)
     print("=== Game Movement Test Driver ===\n")
     
     # Create some hardcoded player objects
