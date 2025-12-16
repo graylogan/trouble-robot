@@ -39,7 +39,7 @@ class Board:
     """Return True if only 1 player remains."""
     return len(players) <= 1
 
-  def side_perspective_transformation(player: Player) -> tuple[bool, bool]:
+  def side_perspective_transformation(self, player: Player) -> tuple[bool, bool]:
     """
     (swap x/y, swap sign)
     """
