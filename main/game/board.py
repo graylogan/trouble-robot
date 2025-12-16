@@ -67,8 +67,7 @@ class Board:
       trans = self.direction_transformation(p_trans, direction)
       sign = -1 if trans[1] else 1
 
-      x = player.gridPos["x"]
-      y = player.gridPos["y"]
+      x, y = player.pos
 
       if trans[0]:  # move along y-axis
           target = (x, y + sign * step)
