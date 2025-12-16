@@ -3,7 +3,6 @@ from game.player_manager import PlayerManager
 from game.board import Board
 from game.player import Player
 from game.constants import ROLL_AGAIN, ENCODE_PLAYER_COLOR, MAGNET_PIN
-from game.plotter import Plotter
 from random import randint
 
 
@@ -16,7 +15,6 @@ class Game:
         self.players_manager = PlayerManager()
         self.game_over: bool = False
         self.roll_value: int = 0
-        self.plotter = Plotter(magnet_pin=MAGNET_PIN)
 
     def run(self) -> None:
         """Run the tabletop game."""
@@ -34,7 +32,7 @@ class Game:
 
             while self.roll_value == ROLL_AGAIN:
                 self.roll_value = self.roll(player)
-                moved = self.board.move(player)
+                moved = self.board.move(player, self.roll_value)
                 # self.board.update() # would implement CV here
 
             if moved and player.isHome():
@@ -45,7 +43,7 @@ class Game:
                 )
 
             self.players_manager.next_player()
-        Plotter.close()
+        self.board.plotter.close()
 
     def roll(self, player) -> int:
         """request roll from cp, read value, return value"""

@@ -1,6 +1,6 @@
 from game.player import Player
 from typing import Optional
-from game.constants import ROLL_AGAIN, BOARD_X, BOARD_Y, DIRECTION_MAP
+from game.constants import ROLL_AGAIN, BOARD_X, BOARD_Y, DIRECTION_MAP, MAGNET_PIN
 from game.plotter import Plotter
 
 class Board:
@@ -8,6 +8,7 @@ class Board:
         self.board: list[list[Optional[Player]]] = [
             [None] * BOARD_Y for _ in range(BOARD_X)
         ]
+        self.plotter = Plotter(magnet_pin=MAGNET_PIN)
 
     def populate(self, players: list[Player]):
         """Place all players on the board at their home positions."""
@@ -35,6 +36,29 @@ class Board:
                 roll -= move
                 x -= move
         return (x, y)
+    
+    def _track_move(self, p: Player, roll: int) -> None:
+        x, y = p.pos
+        while roll > 0:
+            if x == 0 and 0 <= y < 4: # bottom
+                move = min(roll, 4 - y)
+                roll -= move
+                self.low_level_move(p, "LEFT", move)
+            if y == 4 and 0 <= x < 7 and roll > 0: # left
+                move = min(roll, 7 - x)
+                roll -= move
+                self.low_level_move(p, "LEFT", move)
+            if x == 7 and 0 < y <= 4 and roll > 0: # top
+                move = min(roll, y)
+                roll -= move
+                self.low_level_move(p, "LEFT", move)
+            if y == 0 and 0 < x <= 7 and roll > 0: # left
+                move = min(roll, x)
+                roll -= move
+                self.low_level_move(p, "LEFT", move)
+    
+    def _calc_distance(self) -> int:
+        pass
 
     def get_move_desc(
         self, player: Player, roll: int
@@ -51,11 +75,58 @@ class Board:
             return None
         return (player.pos, target)
 
-    def move(self) -> bool:
+    def move(self, p: Player, roll: int, captured: bool = False) -> int:
         """
         returns true if the player moved to new space
         """
+        target = self._track_step(p.pos, roll)
+
+        # can decrease captured step until clear
+        if captured:
+            while self.board[target[0]][target[1]]:
+                roll -= 1
+                target = self._track_step(p.pos, roll)
+        
+        # is piece on target (never true for captured piece)?
+        piece = self.board[target[0]][target[1]]
+        if piece:
+            # move target home (garunteed empty)
+            distance = self._calc_distance(piece.pos, piece.home)
+            while distance > 6:
+                traveled = self.move(piece, 6, captured=True)
+                distance -= traveled
+            if distance > 0:
+                self.move(piece, distance, captured=True)
+            piece.locked = True
+        
+        # can now move the current piece
+        # start by identifying scenario
+        blockers = []
+        sides: set[int]  = set()
+        corners: int = 0
+        i: int = 1
+        t = None
+        while t != target:
+            t = self._track_step(p.pos, i)
+            piece = self.board[t[0]][t[1]]
+            if piece:
+                blockers.append(piece)
+                if self._onCorner(piece):
+                    corners += 1
+                else:
+                    # value doesn't matter here, just uniqueness
+                    sides.add(self.side_perspective_transformation(piece))
+        if not blockers:
+            self.move_alpha(piece, roll)
+        else:
+            raise RuntimeError("Cannot handle scenario with blockers")
+        
+    def _move_alpha(self, p: Player, roll: int):
         pass
+
+
+    def _onCorner(self, p: Player) -> bool:
+        return p.pos in [(0, 0), (0, 4), (7, 4), (7, 0)]
 
     def check_game_over(self, players: list[Player]) -> bool:
         """Return True if only 1 player remains."""
@@ -90,9 +161,10 @@ class Board:
         player: Player,
         direction: str,
         step: int,
-        p_trans: tuple[bool, bool],
-        p: Plotter,
+        p_trans: Optional[tuple[bool, bool]] = None
     ):
+        if not p_trans:
+            p_trans = self.side_perspective_transformation(player)
         # calculate target
         trans = self.direction_transformation(p_trans, direction)
         sign = -1 if trans[1] else 1
@@ -104,6 +176,7 @@ class Board:
         else:  # move along x-axis
             target = (x + sign * step, y)
 
+        p = self.plotter
         # go to player
         p.go_to((x, y))
 
