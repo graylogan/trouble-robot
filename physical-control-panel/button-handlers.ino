@@ -67,4 +67,4 @@ void handleMute() {
          DICE BUTTON
 ************************** */
 
-void handleDice() { dice.roll(3000); }
+void handleDice() { dice.roll(1000); }

@@ -45,7 +45,7 @@ void bot_setup() {
   playSound(UNMUTE_SOUND);
   showPlayerTurnLCD();
   rollCount = dice.numRolls;
-  dice.roll(3000);
+  dice.roll(1000);
 }
 
 void bot_tick() {

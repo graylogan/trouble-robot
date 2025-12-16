@@ -7,6 +7,7 @@ class Dice {
   int PIN;
   bool active;
   unsigned long finishTime;
+  bool settling;
 
   public:
   int numRolls = 0;
@@ -14,6 +15,7 @@ class Dice {
     PIN = pin;
     active = 0;
     numRolls = 0;
+    settling = 0;
   }
 
   bool isActive() {
@@ -30,9 +32,14 @@ class Dice {
 
   void tick() {
     if (!active) return;
-    if (millis() > finishTime) {
+    if (millis() < finishTime) return;
+    if (!settling) {
       digitalWrite(PIN, LOW);
+      settling = 1;
+    }
+    if (millis() > finishTime + 2500) {
       active = 0;
+      settling = 0;
       numRolls++;
     }
   }

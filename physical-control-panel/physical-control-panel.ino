@@ -50,7 +50,7 @@ const char *VICTORY_SOUND =
 /* **************************
       DICE SETUP
 ************************** */
-const int DICE_PIN = 10;
+const int DICE_PIN = A3;
 Dice dice(DICE_PIN);
 // check increase in count to determine roll complettion
 int rollCount;
