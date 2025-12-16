@@ -18,3 +18,13 @@ UNIT_SLEEP = 0.15
 ENCODE_PLAYER_COLOR = {"BLUE": 0, "RED": 1, "GREEN": 2, "YELLOW": 3}
 
 MAGNET_PIN = 11
+
+BOARD_X = 8
+BOARD_Y = 5
+
+DIRECTION_MAP = {
+    "UP": (False, False),
+    "DOWN": (False, True),
+    "LEFT": (True, True),
+    "RIGHT": (True, False),
+}

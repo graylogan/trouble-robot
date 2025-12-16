@@ -1,18 +1,7 @@
 from game.player import Player
 from typing import Optional
-from game.constants import ROLL_AGAIN
+from game.constants import ROLL_AGAIN, BOARD_X, BOARD_Y, DIRECTION_MAP
 from game.plotter import Plotter
-
-BOARD_X = 8
-BOARD_Y = 5
-
-DIRECTION_MAP = {
-    "UP": (False, False),
-    "DOWN": (False, True),
-    "LEFT": (True, True),
-    "RIGHT": (True, False),
-}
-
 
 class Board:
     def __init__(self):
@@ -26,6 +15,27 @@ class Board:
             x, y = p.pos
             self.board[x][y] = p
 
+    def _track_step(self, pos: tuple[int, int], roll: int) -> tuple[int, int]:
+        x, y = pos
+        while roll > 0:
+            if x == 0 and 0 <= y < 4: # bottom
+                move = min(roll, 4 - y)
+                roll -= move
+                y += move
+            if y == 4 and 0 <= x < 7 and roll > 0: # left
+                move = min(roll, 7 - x)
+                roll -= move
+                x += move
+            if x == 7 and 0 < y <= 4 and roll > 0: # top
+                move = min(roll, y)
+                roll -= move
+                y -= move
+            if y == 0 and 0 < x <= 7 and roll > 0: # left
+                move = min(roll, x)
+                roll -= move
+                x -= move
+        return (x, y)
+
     def get_move_desc(
         self, player: Player, roll: int
     ) -> Optional[tuple[tuple[int, int], tuple[int, int]]]:
@@ -33,14 +43,15 @@ class Board:
         if player.locked:
             player.locked = roll != ROLL_AGAIN
             return None
-        # For 2D board, we need to implement the path logic
-        # This is a simplified version - adjust based on your actual game rules
-        from_pos = player.pos
-        # Calculate next position based on roll (this depends on your board layout)
-        to_pos = from_pos  # Placeholder - implement your movement logic
-        return (from_pos, to_pos)
+        target = self._track_step(player.pos, roll)
+        t_piece = self.board[target[0]][target[1]]
+        t_home = t_piece.home
+        if t_piece and self.board[t_home[0]][t_home[1]]:
+            # can't capture because home is blocked
+            return None
+        return (player.pos, target)
 
-    def move() -> bool:
+    def move(self) -> bool:
         """
         returns true if the player moved to new space
         """
