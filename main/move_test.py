@@ -75,7 +75,7 @@ def main():
         print(f"Error during movement test: {e}\n")
         import traceback
         traceback.print_exc()
-    
+    plotter.close()
     print("\n=== Test Complete ===")
 
 if __name__ == "__main__":
