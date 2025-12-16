@@ -3,6 +3,7 @@ from typing import Optional
 from game.constants import ROLL_AGAIN, BOARD_X, BOARD_Y, DIRECTION_MAP, MAGNET_PIN
 from game.plotter import Plotter
 
+
 class Board:
     def __init__(self):
         self.board: list[list[Optional[Player]]] = [
@@ -19,44 +20,44 @@ class Board:
     def _track_step(self, pos: tuple[int, int], roll: int) -> tuple[int, int]:
         x, y = pos
         while roll > 0:
-            if x == 0 and 0 <= y < 4: # bottom
+            if x == 0 and 0 <= y < 4:  # bottom
                 move = min(roll, 4 - y)
                 roll -= move
                 y += move
-            if y == 4 and 0 <= x < 7 and roll > 0: # left
+            if y == 4 and 0 <= x < 7 and roll > 0:  # left
                 move = min(roll, 7 - x)
                 roll -= move
                 x += move
-            if x == 7 and 0 < y <= 4 and roll > 0: # top
+            if x == 7 and 0 < y <= 4 and roll > 0:  # top
                 move = min(roll, y)
                 roll -= move
                 y -= move
-            if y == 0 and 0 < x <= 7 and roll > 0: # left
+            if y == 0 and 0 < x <= 7 and roll > 0:  # left
                 move = min(roll, x)
                 roll -= move
                 x -= move
         return (x, y)
-    
+
     def _track_move(self, p: Player, roll: int) -> None:
         x, y = p.pos
         while roll > 0:
-            if x == 0 and 0 <= y < 4: # bottom
+            if x == 0 and 0 <= y < 4:  # bottom
                 move = min(roll, 4 - y)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
-            if y == 4 and 0 <= x < 7 and roll > 0: # left
+            if y == 4 and 0 <= x < 7 and roll > 0:  # left
                 move = min(roll, 7 - x)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
-            if x == 7 and 0 < y <= 4 and roll > 0: # top
+            if x == 7 and 0 < y <= 4 and roll > 0:  # top
                 move = min(roll, y)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
-            if y == 0 and 0 < x <= 7 and roll > 0: # left
+            if y == 0 and 0 < x <= 7 and roll > 0:  # left
                 move = min(roll, x)
                 roll -= move
                 self.low_level_move(p, "LEFT", move)
-    
+
     def _calc_distance(self, start, stop) -> int:
         distance = 0
         while start != stop:
@@ -90,7 +91,7 @@ class Board:
             while self.board[target[0]][target[1]]:
                 roll -= 1
                 target = self._track_step(p.pos, roll)
-        
+
         # is piece on target (never true for captured piece)?
         piece = self.board[target[0]][target[1]]
         if piece:
@@ -102,11 +103,11 @@ class Board:
             if distance > 0:
                 self.move(piece, distance, captured=True)
             piece.locked = True
-        
+
         # can now move the current piece
         # start by identifying scenario
         blockers = []
-        sides: set[int]  = set()
+        sides: set[int] = set()
         corners: int = 0
         i: int = 1
         t = None
@@ -124,10 +125,9 @@ class Board:
             self.move_alpha(piece, roll)
         else:
             raise RuntimeError("Cannot handle scenario with blockers")
-        
+
     def _move_alpha(self, p: Player, roll: int):
         pass
-
 
     def _onCorner(self, p: Player) -> bool:
         return p.pos in [(0, 0), (0, 4), (7, 4), (7, 0)]
@@ -165,7 +165,7 @@ class Board:
         player: Player,
         direction: str,
         step: int,
-        p_trans: Optional[tuple[bool, bool]] = None
+        p_trans: Optional[tuple[bool, bool]] = None,
     ):
         if not p_trans:
             p_trans = self.side_perspective_transformation(player)
