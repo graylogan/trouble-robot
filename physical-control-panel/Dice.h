@@ -37,7 +37,7 @@ class Dice {
       digitalWrite(PIN, LOW);
       settling = 1;
     }
-    if (millis() > finishTime + 2500) {
+    if (millis() > finishTime + 5000) {
       active = 0;
       settling = 0;
       numRolls++;
