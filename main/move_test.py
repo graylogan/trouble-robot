@@ -4,12 +4,16 @@
 from game.board import Board
 from game.constants import PLAYER_TO_HOME
 from game.player import Player
+import RPi.GPIO as GPIO
+from typing import Optional
 
 
-def read_position(label: str) -> tuple[int, int]:
+def read_position(label: str) -> Optional[tuple[int, int]]:
     while True:
         raw = input(f"Enter {label} position as 'x y': ").strip()
         try:
+            if raw == "":
+                return None
             x_str, y_str = raw.split()
             return int(x_str), int(y_str)
         except ValueError:
@@ -26,10 +30,11 @@ def read_roll() -> int:
 
 
 def main():
+    GPIO.setmode(GPIO.BOARD)
     print("=== Board.test_move() interactive driver ===")
     players = [
-        Player("RED", "test", PLAYER_TO_HOME["RED"]),
-        Player("BLUE", "test", PLAYER_TO_HOME["BLUE"]),
+        Player("BLUE", "test", PLAYER_TO_HOME["RED"]),
+        Player("RED", "test", PLAYER_TO_HOME["BLUE"]),
         Player("GREEN", "test", PLAYER_TO_HOME["GREEN"]),
         Player("YELLOW", "test", PLAYER_TO_HOME["YELLOW"]),
     ]
@@ -41,7 +46,9 @@ def main():
             print("\n--- New test ---")
             for p in players:
                 p.locked = False
-                p.pos = read_position(p.color)
+                position = read_position(p.color)
+                if position:
+                    p.pos = position
 
             roll = read_roll()
             moved = board.test_move(players, roll, players[0])
@@ -51,6 +58,7 @@ def main():
     finally:
         try:
             board.plotter.close()
+            GPIO.cleanup()
         except Exception:
             pass
 
