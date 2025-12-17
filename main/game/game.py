@@ -13,8 +13,8 @@ class Game:
     """Main game loop orchestrator."""
 
     def __init__(self):
-        # self.cp = ControlPanelProtocol()
-        self.cp = ControlPanelProtocol(simulation=False, port="/dev/ttyACM0")
+        self.cp = ControlPanelProtocol()
+        # self.cp = ControlPanelProtocol(simulation=False, port="/dev/ttyACM0")
         self.board = Board()
         self.players_manager = PlayerManager()
         self.game_over: bool = False
@@ -26,6 +26,11 @@ class Game:
     def run(self) -> None:
         """Run the tabletop game."""
         self._establish_connections()
+
+        # Start camera once, keep it running for the whole game
+        self.cam = DiceCamera(cam_index=0, zoom=2.5, out_size=800)
+        self.cam.start()
+
         config: dict[str, str | None] = self.cp.wait_for_config()
         self.players_manager.create_players(config)
         self.board.populate(self.players_manager.players)

@@ -152,6 +152,8 @@ class Board:
             self._move_alpha(p, roll)
         elif len(sides) == 1 and corners == 0:
             self._move_A(p, roll, blockers)
+        elif len(sides) == 2 and corners == 0:
+            self._move_F(p, roll, blockers)
         else:
             raise RuntimeError("Cannot handle scenario with blockers")
 
@@ -160,10 +162,23 @@ class Board:
 
     def _move_A(self, p: Player, roll: int, blockers: list[Player]):
         for b in blockers:
-            self.low_level_move(b, "UP", 2)
+            p_trans = self.side_perspective_transformation(b)
+            self.low_level_move(b, "UP", 2, p_trans)
         self._track_move(p, roll)
         for b in blockers:
-            self.low_level_move(b, "DOWN", 2)
+            self.low_level_move(b, "DOWN", 2, p_trans)
+
+    def _move_F(self, p: Player, roll: int, blockers: list[Player]):
+        undo = []
+        for b in blockers:
+            p_trans = self.side_perspective_transformation(b)
+            self.low_level_move(b, "UP", 3, p_trans)
+            undo.append((b, "DOWN", p_trans))
+
+        self._track_move(p, roll)
+
+        for b, direction, p_trans in undo:
+            self.low_level_move(b, direction, 3, p_trans)
 
     def _onCorner(self, p: Player) -> bool:
         return p.pos in [(0, 0), (0, 4), (7, 4), (7, 0)]
