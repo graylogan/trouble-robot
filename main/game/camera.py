@@ -3,18 +3,20 @@ import numpy as np
 import threading
 import time
 
+
 def center_square_zoom(frame, zoom=2.0, out_size=800):
     h, w = frame.shape[:2]
     s0 = min(h, w)
     s = int(s0 / zoom)
     x1 = (w - s) // 2
     y1 = (h - s) // 2
-    crop = frame[y1:y1+s, x1:x1+s]
+    crop = frame[y1 : y1 + s, x1 : x1 + s]
     return cv2.resize(crop, (out_size, out_size), interpolation=cv2.INTER_LINEAR)
+
 
 def count_white_pips(frame_bgr):
     h, w = frame_bgr.shape[:2]
-    crop = frame_bgr[int(h*0.15):int(h*0.85), int(w*0.15):int(w*0.85)]
+    crop = frame_bgr[int(h * 0.15) : int(h * 0.85), int(w * 0.15) : int(w * 0.85)]
 
     hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
 
@@ -50,11 +52,35 @@ def count_white_pips(frame_bgr):
 
     return pip_count, mask, debug
 
+
 class DiceCamera:
     def __init__(self, cam_index=0, zoom=2.5, out_size=800):
-        self.cap = cv2.VideoCapture(cam_index)
-        if not self.cap.isOpened():
-            raise RuntimeError(f"Could not open camera index {cam_index}")
+        # Try V4L2 first (reliable on Linux/RPi), fall back to default backend.
+        self.cap = None
+        tried = []
+        for backend in (cv2.CAP_V4L2, 0):
+            try:
+                self.cap = (
+                    cv2.VideoCapture(cam_index, backend)
+                    if backend != 0
+                    else cv2.VideoCapture(cam_index)
+                )
+                tried.append(backend)
+                if self.cap.isOpened():
+                    break
+            except Exception:
+                self.cap = None
+
+        if not self.cap or not self.cap.isOpened():
+            raise RuntimeError(
+                f"Could not open camera index {cam_index}. Backends tried: {tried}"
+            )
+
+        # Reduce internal buffering to avoid stale/invalid frames
+        try:
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except Exception:
+            pass
 
         self.zoom = zoom
         self.out_size = out_size
@@ -72,10 +98,18 @@ class DiceCamera:
         self._thread.start()
 
     def _loop(self):
+        last_warn = 0
         while self._running:
             ok, frame = self.cap.read()
-            if not ok:
-                time.sleep(0.01)
+            if not ok or frame is None:
+                # don't spam; print a warning once per 2s to help debugging
+                if time.time() - last_warn > 2.0:
+                    print(
+                        "Warning: camera read failed (ok=False or frame=None)",
+                        flush=True,
+                    )
+                    last_warn = time.time()
+                time.sleep(0.1)
                 continue
 
             frame = center_square_zoom(frame, zoom=self.zoom, out_size=self.out_size)
@@ -145,6 +179,7 @@ def main():
     finally:
         cam.stop()
         cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

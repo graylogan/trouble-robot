@@ -13,8 +13,8 @@ class Game:
     """Main game loop orchestrator."""
 
     def __init__(self):
-        self.cp = ControlPanelProtocol()
-        # self.cp = ControlPanelProtocol(simulation=False, port="/dev/ttyACM0")
+        # self.cp = ControlPanelProtocol()
+        self.cp = ControlPanelProtocol(simulation=False, port="/dev/ttyACM0")
         self.board = Board()
         self.players_manager = PlayerManager()
         self.game_over: bool = False
@@ -28,8 +28,10 @@ class Game:
         self._establish_connections()
 
         # Start camera once, keep it running for the whole game
-        self.cam = DiceCamera(cam_index=0, zoom=2.5, out_size=800)
+        self.cam = DiceCamera()
         self.cam.start()
+        if not self.cam.wait_for_first_frame():
+            raise RuntimeError("Camera never produced a frame")
 
         config: dict[str, str | None] = self.cp.wait_for_config()
         self.players_manager.create_players(config)
@@ -39,12 +41,6 @@ class Game:
         self.determine_order()
         print("GAME: order determined.")
 
-        # Start camera once, keep it running for the whole game
-        self.cam = DiceCamera(cam_index=1, zoom=2.5, out_size=800)
-        self.cam.start()
-        if not self.cam.wait_for_first_frame():
-            raise RuntimeError("Camera never produced a frame")
-
         try:
             while not self.game_over and self.players_manager.players:
                 frame = self.cam.get_latest_frame()
@@ -53,7 +49,9 @@ class Game:
                     continue
 
                 print(self.board.board)
-                player: Player = self.players_manager.players[self.players_manager.current_index]
+                player: Player = self.players_manager.players[
+                    self.players_manager.current_index
+                ]
                 self.roll_value = ROLL_AGAIN
 
                 moved = False
@@ -66,7 +64,9 @@ class Game:
                 if moved and player.isHome():
                     self.cp.send_victory(player)
                     self.players_manager.players.remove(player)
-                    self.game_over = self.board.check_game_over(self.players_manager.players)
+                    self.game_over = self.board.check_game_over(
+                        self.players_manager.players
+                    )
 
                 self.players_manager.next_player()
 
@@ -118,4 +118,3 @@ class Game:
             ordered.append(self.players_manager.players[i])
             i = (i + 1) % numPlayers
         self.players_manager.players = ordered
-
