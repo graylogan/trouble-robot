@@ -51,7 +51,7 @@ def count_white_pips(frame_bgr):
     return pip_count, mask, debug
 
 class DiceCamera:
-    def __init__(self, cam_index=1, zoom=2.5, out_size=800):
+    def __init__(self, cam_index=0, zoom=2.5, out_size=800):
         self.cap = cv2.VideoCapture(cam_index)
         if not self.cap.isOpened():
             raise RuntimeError(f"Could not open camera index {cam_index}")
@@ -59,10 +59,12 @@ class DiceCamera:
         self.zoom = zoom
         self.out_size = out_size
 
-        self._lock = threading.Lock()
         self._latest = None
+        self._lock = threading.Lock()
         self._running = False
         self._thread = None
+
+        self._first_frame_event = threading.Event()
 
     def start(self):
         self._running = True
@@ -80,6 +82,15 @@ class DiceCamera:
             with self._lock:
                 self._latest = frame
 
+            self._first_frame_event.set()
+
+    def wait_for_first_frame(self, timeout=10.0) -> bool:
+        """
+        Blocks until the first frame is available or timeout occurs.
+        Returns True if frame arrived, False if timed out.
+        """
+        return self._first_frame_event.wait(timeout)
+
     def get_latest_frame(self):
         with self._lock:
             return None if self._latest is None else self._latest.copy()
@@ -95,37 +106,3 @@ class DiceCamera:
         if self._thread:
             self._thread.join(timeout=1.0)
         self.cap.release()
-
-def main():
-    cam = DiceCamera(cam_index=1, zoom=2.5, out_size=800)
-    cam.start()
-
-    try:
-        while True:
-            frame = cam.get_latest_frame()
-            if frame is None:
-                continue
-
-            # Example: press SPACE to “whenever I want” get pips
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord(" "):
-                count, mask, debug = cam.get_pips()
-                print("Pips:", count)
-
-                # show analysis windows only when requested
-                if mask is not None:
-                    cv2.imshow("Mask", mask)
-                if debug is not None:
-                    cv2.imshow("Mask Debug", debug)
-
-            # always show camera
-            cv2.imshow("Camera", frame)
-
-            if key == ord("q"):
-                break
-    finally:
-        cam.stop()
-        cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    main()

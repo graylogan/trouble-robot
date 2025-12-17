@@ -37,6 +37,8 @@ class Game:
         # Start camera once, keep it running for the whole game
         self.cam = DiceCamera(cam_index=1, zoom=2.5, out_size=800)
         self.cam.start()
+        if not self.cam.wait_for_first_frame():
+            raise RuntimeError("Camera never produced a frame")
 
         try:
             while not self.game_over and self.players_manager.players:
