@@ -88,7 +88,11 @@ class Game:
             if count is None:
                 raise RuntimeError("No camera frame available to read pips.")
             print("Pips:", count)
-            return int(count)
+            if count < 1:
+                count = 1
+            elif count > 6:
+                count = 6
+            return count
 
         raise Exception("roll failed")
 
