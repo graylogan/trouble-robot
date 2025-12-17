@@ -1,9 +1,12 @@
+import time
+import cv2
+
 from game.serial_protocol import ControlPanelProtocol
 from game.player_manager import PlayerManager
 from game.board import Board
 from game.player import Player
-from game.constants import ROLL_AGAIN, ENCODE_PLAYER_COLOR, MAGNET_PIN
-from random import randint
+from game.constants import ROLL_AGAIN, ENCODE_PLAYER_COLOR
+from game.camera import DiceCamera
 
 
 class Game:
@@ -17,49 +20,70 @@ class Game:
         self.game_over: bool = False
         self.roll_value: int = 0
 
+        # Camera handle lives on the instance so roll() can access it
+        self.cam: DiceCamera | None = None
+
     def run(self) -> None:
         """Run the tabletop game."""
         self._establish_connections()
         config: dict[str, str | None] = self.cp.wait_for_config()
         self.players_manager.create_players(config)
         self.board.populate(self.players_manager.players)
+
         print("GAME: created players. Determining order...")
         self.determine_order()
         print("GAME: order determined.")
 
-        while not self.game_over and self.players_manager.players:
-            print(self.board.board)
-            player: Player = self.players_manager.players[
-                self.players_manager.current_index
-            ]
-            self.roll_value = ROLL_AGAIN
+        # Start camera once, keep it running for the whole game
+        self.cam = DiceCamera(cam_index=1, zoom=2.5, out_size=800)
+        self.cam.start()
 
-            while self.roll_value == ROLL_AGAIN:
-                print("GAME: rolling...")
-                self.roll_value = self.roll(player)
-                print("GAME: moving...")
-                moved = self.board.move(player, self.roll_value)
-                # self.board.update() # would implement CV here
+        try:
+            while not self.game_over and self.players_manager.players:
+                frame = self.cam.get_latest_frame()
+                if frame is None:
+                    time.sleep(0.01)
+                    continue
 
-            if moved and player.isHome():
-                self.cp.send_victory(player)
-                self.players_manager.players.remove(player)
-                self.game_over = self.board.check_game_over(
-                    self.players_manager.players
-                )
+                print(self.board.board)
+                player: Player = self.players_manager.players[self.players_manager.current_index]
+                self.roll_value = ROLL_AGAIN
 
-            self.players_manager.next_player()
-        self.board.plotter.close()
+                moved = False
+                while self.roll_value == ROLL_AGAIN:
+                    print("GAME: rolling...")
+                    self.roll_value = self.roll(player)
+                    print("GAME: moving...")
+                    moved = self.board.move(player, self.roll_value)
+                    # self.board.update()  # would implement CV here
+                if moved and player.isHome():
+                    self.cp.send_victory(player)
+                    self.players_manager.players.remove(player)
+                    self.game_over = self.board.check_game_over(self.players_manager.players)
 
-    def roll(self, player) -> int:
-        """request roll from cp, read value, return value"""
+                self.players_manager.next_player()
+
+        finally:
+            if self.cam is not None:
+                self.cam.stop()
+                self.cam = None
+            cv2.destroyAllWindows()
+            self.board.plotter.close()
+
+    def roll(self, player: Player) -> int:
+        """Request roll from control panel, read value from camera, return value."""
+        if self.cam is None:
+            raise RuntimeError("Camera not initialized. Did you call run()?")
         self.cp.send_roll_request(ENCODE_PLAYER_COLOR[player.color])
         if self.cp.wait_for_dice_complete():
-            roll = int(input("roll ->"))  # randint(1, 6)
-            print("ROLL:", roll)
-            return roll
-        else:
-            raise Exception("roll failed")
+            count, mask, debug = self.cam.get_pips()
+            # If something went wrong and we couldn't read a frame yet
+            if count is None:
+                raise RuntimeError("No camera frame available to read pips.")
+            print("Pips:", count)
+            return int(count)
+
+        raise Exception("roll failed")
 
     def _establish_connections(self) -> None:
         self.cp.connect()
@@ -88,4 +112,3 @@ class Game:
             i = (i + 1) % numPlayers
         self.players_manager.players = ordered
 
-    
