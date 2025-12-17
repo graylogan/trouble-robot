@@ -84,7 +84,7 @@ class DiceCamera:
 
             self._first_frame_event.set()
 
-    def wait_for_first_frame(self, timeout=10.0) -> bool:
+    def wait_for_first_frame(self, timeout=2.0) -> bool:
         """
         Blocks until the first frame is available or timeout occurs.
         Returns True if frame arrived, False if timed out.
@@ -104,5 +104,47 @@ class DiceCamera:
     def stop(self):
         self._running = False
         if self._thread:
-            self._thread.join(timeout=1.0)
+            self._thread.join(timeout=1)
         self.cap.release()
+
+
+def main():
+    cam = DiceCamera(cam_index=0, zoom=2.5, out_size=800)
+    cam.start()
+
+    last_read_time = 0
+    READ_INTERVAL = 5.0
+
+    try:
+        while True:
+            frame = cam.get_latest_frame()
+            if frame is None:
+                continue
+
+            now = time.time()
+
+            # every 5 seconds, read dice
+            if now - last_read_time >= READ_INTERVAL:
+                last_read_time = now
+
+                count, mask, debug = cam.get_pips()
+                print("Pips:", count)
+
+                if mask is not None:
+                    cv2.imshow("Mask", mask)
+                if debug is not None:
+                    cv2.imshow("Mask Debug", debug)
+
+            # always show camera
+            cv2.imshow("Camera", frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
+                break
+
+    finally:
+        cam.stop()
+        cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
